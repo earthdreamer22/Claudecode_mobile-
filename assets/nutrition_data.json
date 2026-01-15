@@ -1,0 +1,504 @@
+{
+  "foods": [
+    {
+      "name": "돼지불고기 (100g)",
+      "category": "육류",
+      "calories": 384,
+      "sodium_mg": 58,
+      "sugar_g": 0,
+      "fat_g": 35,
+      "protein_g": 20,
+      "carbs_g": 0
+    },
+    {
+      "name": "소고기 (100g)",
+      "category": "육류",
+      "calories": 250,
+      "sodium_mg": 55,
+      "sugar_g": 0,
+      "fat_g": 15,
+      "protein_g": 26,
+      "carbs_g": 0
+    },
+    {
+      "name": "닭가슴살 (100g)",
+      "category": "육류",
+      "calories": 165,
+      "sodium_mg": 74,
+      "sugar_g": 0,
+      "fat_g": 3.6,
+      "protein_g": 31,
+      "carbs_g": 0
+    },
+    {
+      "name": "삼겹살 (100g)",
+      "category": "육류",
+      "calories": 518,
+      "sodium_mg": 46,
+      "sugar_g": 0,
+      "fat_g": 52,
+      "protein_g": 14,
+      "carbs_g": 0
+    },
+    {
+      "name": "김치 (100g)",
+      "category": "채소",
+      "calories": 20,
+      "sodium_mg": 600,
+      "sugar_g": 1,
+      "fat_g": 0.5,
+      "protein_g": 1,
+      "carbs_g": 4
+    },
+    {
+      "name": "배추 (100g)",
+      "category": "채소",
+      "calories": 13,
+      "sodium_mg": 9,
+      "sugar_g": 1.2,
+      "fat_g": 0.1,
+      "protein_g": 1.2,
+      "carbs_g": 2.2
+    },
+    {
+      "name": "상추 (100g)",
+      "category": "채소",
+      "calories": 15,
+      "sodium_mg": 28,
+      "sugar_g": 0.8,
+      "fat_g": 0.2,
+      "protein_g": 1.4,
+      "carbs_g": 2.9
+    },
+    {
+      "name": "오이 (100g)",
+      "category": "채소",
+      "calories": 15,
+      "sodium_mg": 2,
+      "sugar_g": 1.7,
+      "fat_g": 0.1,
+      "protein_g": 0.7,
+      "carbs_g": 3.6
+    },
+    {
+      "name": "당근 (100g)",
+      "category": "채소",
+      "calories": 41,
+      "sodium_mg": 69,
+      "sugar_g": 4.7,
+      "fat_g": 0.2,
+      "protein_g": 0.9,
+      "carbs_g": 10
+    },
+    {
+      "name": "양파 (100g)",
+      "category": "채소",
+      "calories": 40,
+      "sodium_mg": 4,
+      "sugar_g": 4.2,
+      "fat_g": 0.1,
+      "protein_g": 1.1,
+      "carbs_g": 9.3
+    },
+    {
+      "name": "흰쌀 (1공기, 150g)",
+      "category": "곡류",
+      "calories": 195,
+      "sodium_mg": 5,
+      "sugar_g": 0,
+      "fat_g": 0.3,
+      "protein_g": 4,
+      "carbs_g": 43
+    },
+    {
+      "name": "현미밥 (1공기, 150g)",
+      "category": "곡류",
+      "calories": 187,
+      "sodium_mg": 3,
+      "sugar_g": 0,
+      "fat_g": 1.5,
+      "protein_g": 4.5,
+      "carbs_g": 39
+    },
+    {
+      "name": "식빵 (1장)",
+      "category": "곡류",
+      "calories": 80,
+      "sodium_mg": 140,
+      "sugar_g": 1.5,
+      "fat_g": 1,
+      "protein_g": 2.5,
+      "carbs_g": 15
+    },
+    {
+      "name": "떡 (100g)",
+      "category": "곡류",
+      "calories": 235,
+      "sodium_mg": 2,
+      "sugar_g": 0.2,
+      "fat_g": 0.5,
+      "protein_g": 4,
+      "carbs_g": 52
+    },
+    {
+      "name": "계란 (1개)",
+      "category": "유제품",
+      "calories": 155,
+      "sodium_mg": 124,
+      "sugar_g": 1,
+      "fat_g": 11,
+      "protein_g": 13,
+      "carbs_g": 1
+    },
+    {
+      "name": "우유 (200ml)",
+      "category": "유제품",
+      "calories": 122,
+      "sodium_mg": 90,
+      "sugar_g": 9.6,
+      "fat_g": 6.4,
+      "protein_g": 6.4,
+      "carbs_g": 9.6
+    },
+    {
+      "name": "요구르트 (100ml)",
+      "category": "유제품",
+      "calories": 61,
+      "sodium_mg": 46,
+      "sugar_g": 4.7,
+      "fat_g": 3.3,
+      "protein_g": 3.5,
+      "carbs_g": 4.7
+    },
+    {
+      "name": "치즈 (1장, 20g)",
+      "category": "유제품",
+      "calories": 67,
+      "sodium_mg": 140,
+      "sugar_g": 0.4,
+      "fat_g": 5.5,
+      "protein_g": 4.4,
+      "carbs_g": 0.5
+    },
+    {
+      "name": "사과 (1개, 200g)",
+      "category": "과일",
+      "calories": 104,
+      "sodium_mg": 2,
+      "sugar_g": 20.8,
+      "fat_g": 0.3,
+      "protein_g": 0.5,
+      "carbs_g": 27.6
+    },
+    {
+      "name": "바나나 (1개)",
+      "category": "과일",
+      "calories": 89,
+      "sodium_mg": 1,
+      "sugar_g": 12.2,
+      "fat_g": 0.3,
+      "protein_g": 1.1,
+      "carbs_g": 22.8
+    },
+    {
+      "name": "딸기 (100g)",
+      "category": "과일",
+      "calories": 32,
+      "sodium_mg": 1,
+      "sugar_g": 4.9,
+      "fat_g": 0.3,
+      "protein_g": 0.7,
+      "carbs_g": 7.7
+    },
+    {
+      "name": "포도 (100g)",
+      "category": "과일",
+      "calories": 69,
+      "sodium_mg": 2,
+      "sugar_g": 15.5,
+      "fat_g": 0.2,
+      "protein_g": 0.7,
+      "carbs_g": 18.1
+    },
+    {
+      "name": "수박 (100g)",
+      "category": "과일",
+      "calories": 30,
+      "sodium_mg": 1,
+      "sugar_g": 6.2,
+      "fat_g": 0.2,
+      "protein_g": 0.6,
+      "carbs_g": 7.6
+    },
+    {
+      "name": "콜라 (250ml)",
+      "category": "음료",
+      "calories": 105,
+      "sodium_mg": 20,
+      "sugar_g": 26,
+      "fat_g": 0,
+      "protein_g": 0,
+      "carbs_g": 26
+    },
+    {
+      "name": "사이다 (250ml)",
+      "category": "음료",
+      "calories": 95,
+      "sodium_mg": 15,
+      "sugar_g": 23,
+      "fat_g": 0,
+      "protein_g": 0,
+      "carbs_g": 23
+    },
+    {
+      "name": "오렌지주스 (200ml)",
+      "category": "음료",
+      "calories": 90,
+      "sodium_mg": 2,
+      "sugar_g": 18,
+      "fat_g": 0.4,
+      "protein_g": 1.4,
+      "carbs_g": 20.8
+    },
+    {
+      "name": "커피 (아메리카노)",
+      "category": "음료",
+      "calories": 5,
+      "sodium_mg": 5,
+      "sugar_g": 0,
+      "fat_g": 0,
+      "protein_g": 0.3,
+      "carbs_g": 0.9
+    },
+    {
+      "name": "카페라떼 (250ml)",
+      "category": "음료",
+      "calories": 120,
+      "sodium_mg": 85,
+      "sugar_g": 9,
+      "fat_g": 5,
+      "protein_g": 6,
+      "carbs_g": 12
+    },
+    {
+      "name": "라면 (끓인 것, 1인분)",
+      "category": "가공식품",
+      "calories": 350,
+      "sodium_mg": 1800,
+      "sugar_g": 0.5,
+      "fat_g": 12,
+      "protein_g": 8,
+      "carbs_g": 55
+    },
+    {
+      "name": "햄 (1장, 30g)",
+      "category": "가공식품",
+      "calories": 45,
+      "sodium_mg": 270,
+      "sugar_g": 1,
+      "fat_g": 2.5,
+      "protein_g": 4,
+      "carbs_g": 2
+    },
+    {
+      "name": "소시지 (1개)",
+      "category": "가공식품",
+      "calories": 140,
+      "sodium_mg": 420,
+      "sugar_g": 1,
+      "fat_g": 12,
+      "protein_g": 5,
+      "carbs_g": 3
+    },
+    {
+      "name": "치킨너겟 (5개)",
+      "category": "가공식품",
+      "calories": 220,
+      "sodium_mg": 540,
+      "sugar_g": 0.5,
+      "fat_g": 14,
+      "protein_g": 12,
+      "carbs_g": 13
+    },
+    {
+      "name": "피자 (1조각)",
+      "category": "가공식품",
+      "calories": 285,
+      "sodium_mg": 640,
+      "sugar_g": 3.5,
+      "fat_g": 10,
+      "protein_g": 12,
+      "carbs_g": 36
+    },
+    {
+      "name": "햄버거 (1개)",
+      "category": "가공식품",
+      "calories": 540,
+      "sodium_mg": 1050,
+      "sugar_g": 8,
+      "fat_g": 29,
+      "protein_g": 25,
+      "carbs_g": 45
+    },
+    {
+      "name": "감자튀김 (중)",
+      "category": "가공식품",
+      "calories": 340,
+      "sodium_mg": 270,
+      "sugar_g": 0,
+      "fat_g": 16,
+      "protein_g": 4,
+      "carbs_g": 44
+    },
+    {
+      "name": "참치캔 (100g)",
+      "category": "가공식품",
+      "calories": 116,
+      "sodium_mg": 340,
+      "sugar_g": 0,
+      "fat_g": 0.8,
+      "protein_g": 26,
+      "carbs_g": 0
+    },
+    {
+      "name": "된장 (10g)",
+      "category": "가공식품",
+      "calories": 14,
+      "sodium_mg": 430,
+      "sugar_g": 0.6,
+      "fat_g": 0.5,
+      "protein_g": 1.4,
+      "carbs_g": 1.8
+    },
+    {
+      "name": "간장 (10ml)",
+      "category": "가공식품",
+      "calories": 6,
+      "sodium_mg": 600,
+      "sugar_g": 0.4,
+      "fat_g": 0,
+      "protein_g": 0.6,
+      "carbs_g": 0.9
+    },
+    {
+      "name": "고추장 (10g)",
+      "category": "가공식품",
+      "calories": 25,
+      "sodium_mg": 280,
+      "sugar_g": 3.5,
+      "fat_g": 0.3,
+      "protein_g": 0.7,
+      "carbs_g": 5.1
+    },
+    {
+      "name": "마요네즈 (10g)",
+      "category": "가공식품",
+      "calories": 70,
+      "sodium_mg": 65,
+      "sugar_g": 0.1,
+      "fat_g": 7.5,
+      "protein_g": 0.1,
+      "carbs_g": 0.4
+    },
+    {
+      "name": "케첩 (10g)",
+      "category": "가공식품",
+      "calories": 11,
+      "sodium_mg": 110,
+      "sugar_g": 2.3,
+      "fat_g": 0,
+      "protein_g": 0.2,
+      "carbs_g": 2.7
+    },
+    {
+      "name": "두부 (100g)",
+      "category": "채소",
+      "calories": 76,
+      "sodium_mg": 7,
+      "sugar_g": 0.7,
+      "fat_g": 4.8,
+      "protein_g": 8.1,
+      "carbs_g": 1.9
+    },
+    {
+      "name": "감자 (100g)",
+      "category": "채소",
+      "calories": 77,
+      "sodium_mg": 6,
+      "sugar_g": 0.8,
+      "fat_g": 0.1,
+      "protein_g": 2,
+      "carbs_g": 17.5
+    },
+    {
+      "name": "고구마 (100g)",
+      "category": "채소",
+      "calories": 86,
+      "sodium_mg": 55,
+      "sugar_g": 4.2,
+      "fat_g": 0.1,
+      "protein_g": 1.6,
+      "carbs_g": 20.1
+    },
+    {
+      "name": "호박 (100g)",
+      "category": "채소",
+      "calories": 26,
+      "sodium_mg": 1,
+      "sugar_g": 2.8,
+      "fat_g": 0.1,
+      "protein_g": 1,
+      "carbs_g": 6.5
+    },
+    {
+      "name": "버섯 (100g)",
+      "category": "채소",
+      "calories": 22,
+      "sodium_mg": 5,
+      "sugar_g": 1.7,
+      "fat_g": 0.3,
+      "protein_g": 3.1,
+      "carbs_g": 3.3
+    },
+    {
+      "name": "깻잎 (100g)",
+      "category": "채소",
+      "calories": 41,
+      "sodium_mg": 3,
+      "sugar_g": 0.5,
+      "fat_g": 1,
+      "protein_g": 3.9,
+      "carbs_g": 6.4
+    },
+    {
+      "name": "마늘 (10g)",
+      "category": "채소",
+      "calories": 15,
+      "sodium_mg": 2,
+      "sugar_g": 0.1,
+      "fat_g": 0.1,
+      "protein_g": 0.6,
+      "carbs_g": 3.3
+    },
+    {
+      "name": "생강 (10g)",
+      "category": "채소",
+      "calories": 8,
+      "sodium_mg": 1,
+      "sugar_g": 0.2,
+      "fat_g": 0.1,
+      "protein_g": 0.2,
+      "carbs_g": 1.8
+    },
+    {
+      "name": "아이스크림 (1컵, 100ml)",
+      "category": "기타",
+      "calories": 207,
+      "sodium_mg": 80,
+      "sugar_g": 21,
+      "fat_g": 11,
+      "protein_g": 3.5,
+      "carbs_g": 24
+    }
+  ]
+}

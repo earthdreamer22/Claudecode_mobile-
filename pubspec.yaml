@@ -1,0 +1,61 @@
+name: receipt_health_predictor
+description: 영수증 기반 만성질환 예측 앱
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.13.0'
+
+# Android 프로덕션 배포 기준 (Google Play Store 2024년 이후)
+# minSdkVersion: 24 (build.gradle 에서 설정)
+# targetSdkVersion: 35
+# compileSdkVersion: 35
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 카메라 & 이미지 처리
+  camera: ^0.10.5
+  image_picker: ^1.0.4
+  image: ^4.0.0
+  path_provider: ^2.1.0
+
+  # OCR - Google ML Kit
+  google_mlkit_text_recognition: ^0.13.0
+
+  # 로컬 데이터베이스
+  sqflite: ^2.3.0
+  drift: ^2.14.0
+  sqlite3_flutter_libs: ^0.5.0
+
+  # 상태 관리
+  riverpod: ^2.4.0
+  flutter_riverpod: ^2.4.0
+
+  # UI & Charts
+  fl_chart: ^0.65.0
+  percent_indicator: ^4.1.0
+  intl: ^0.19.0
+
+  # 유틸리티
+  uuid: ^4.0.0
+  json_annotation: ^4.8.0
+  shared_preferences: ^2.2.0
+
+  # 로깅
+  logger: ^2.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.0
+  drift_dev: ^2.14.0
+  json_serializable: ^6.7.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/nutrition_data.json

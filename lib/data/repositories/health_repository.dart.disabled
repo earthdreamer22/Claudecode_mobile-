@@ -1,0 +1,127 @@
+import 'package:drift/drift.dart';
+import '../database/app_database.dart';
+
+/// 건강 통계 Repository
+class HealthRepository {
+  final AppDatabase _db;
+
+  HealthRepository(this._db);
+
+  /// 건강 통계 생성 또는 업데이트
+  Future<void> upsertHealthStat({
+    required int userId,
+    required DateTime date,
+    required int totalSodium,
+    required int totalCalories,
+    required double totalSugar,
+    required double totalFat,
+    required double totalProtein,
+    required double totalCarbs,
+    required double metabolicScore,
+    required String riskLevel,
+  }) async {
+    final targetDate = DateTime(date.year, date.month, date.day);
+
+    await _db.upsertHealthStat(
+      HealthStatsCompanion.insert(
+        userId: userId,
+        date: targetDate,
+        totalSodium: totalSodium,
+        totalCalories: totalCalories,
+        totalSugar: totalSugar,
+        totalFat: totalFat,
+        totalProtein: totalProtein,
+        totalCarbs: totalCarbs,
+        metabolicScore: metabolicScore,
+        riskLevel: riskLevel,
+      ),
+    );
+  }
+
+  /// 특정 날짜의 건강 통계 조회
+  Future<HealthStatData?> getHealthStatByDate(
+      int userId, DateTime date) async {
+    return await _db.getHealthStatByDate(userId, date);
+  }
+
+  /// 날짜 범위로 건강 통계 조회
+  Future<List<HealthStatData>> getHealthStatsByDateRange(
+      int userId, DateTime startDate, DateTime endDate) async {
+    return await _db.getHealthStatsByDateRange(userId, startDate, endDate);
+  }
+
+  /// 최근 N일의 건강 통계 조회
+  Future<List<HealthStatData>> getRecentHealthStats(
+      int userId, int days) async {
+    return await _db.getRecentHealthStats(userId, days);
+  }
+
+  /// 주간 평균 계산
+  Future<Map<String, double>> getWeeklyAverage(int userId) async {
+    final stats = await getRecentHealthStats(userId, 7);
+    if (stats.isEmpty) {
+      return {
+        'avgSodium': 0.0,
+        'avgCalories': 0.0,
+        'avgSugar': 0.0,
+        'avgScore': 0.0,
+      };
+    }
+
+    final totalSodium = stats.fold<double>(
+        0.0, (sum, stat) => sum + stat.totalSodium.toDouble());
+    final totalCalories = stats.fold<double>(
+        0.0, (sum, stat) => sum + stat.totalCalories.toDouble());
+    final totalSugar =
+        stats.fold<double>(0.0, (sum, stat) => sum + stat.totalSugar);
+    final totalScore =
+        stats.fold<double>(0.0, (sum, stat) => sum + stat.metabolicScore);
+
+    return {
+      'avgSodium': totalSodium / stats.length,
+      'avgCalories': totalCalories / stats.length,
+      'avgSugar': totalSugar / stats.length,
+      'avgScore': totalScore / stats.length,
+    };
+  }
+
+  /// 월별 평균 대사증후군 점수 조회
+  Future<List<Map<String, dynamic>>> getMonthlyAverageScores(
+      int userId, int months) async {
+    return await _db.getMonthlyAverageScores(userId, months);
+  }
+
+  /// 최근 위험도 추이 분석 (개선/악화)
+  Future<String> getTrendAnalysis(int userId) async {
+    final stats = await getRecentHealthStats(userId, 14);
+    if (stats.length < 7) {
+      return 'insufficient_data';
+    }
+
+    // 최근 7일과 이전 7일 비교
+    final recentWeek = stats.take(7).toList();
+    final previousWeek = stats.skip(7).take(7).toList();
+
+    final recentAvg = recentWeek.fold<double>(
+            0.0, (sum, stat) => sum + stat.metabolicScore) /
+        recentWeek.length;
+    final previousAvg = previousWeek.fold<double>(
+            0.0, (sum, stat) => sum + stat.metabolicScore) /
+        previousWeek.length;
+
+    final diff = recentAvg - previousAvg;
+
+    if (diff < -5) {
+      return 'improving'; // 개선 중
+    } else if (diff > 5) {
+      return 'worsening'; // 악화 중
+    } else {
+      return 'stable'; // 안정적
+    }
+  }
+
+  /// 오늘 건강 통계 조회
+  Future<HealthStatData?> getTodayHealthStat(int userId) async {
+    return await getHealthStatByDate(userId, DateTime.now());
+  }
+}
