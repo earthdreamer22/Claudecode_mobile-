@@ -30,27 +30,41 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _initializeCamera() async {
     try {
+      print('카메라 초기화 시작');
       _cameras = await availableCameras();
-      if (_cameras!.isEmpty) {
-        _showError('카메라를 사용할 수 없습니다.');
+
+      if (_cameras == null || _cameras!.isEmpty) {
+        print('사용 가능한 카메라 없음');
+        if (mounted) {
+          _showError('카메라를 사용할 수 없습니다.');
+        }
         return;
       }
 
+      print('카메라 개수: ${_cameras!.length}');
+
       _cameraController = CameraController(
         _cameras![0],
-        ResolutionPreset.high,
+        ResolutionPreset.medium, // high → medium으로 변경 (메모리 절약)
         enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg, // JPEG 포맷 명시
       );
 
+      print('카메라 컨트롤러 초기화 중...');
       await _cameraController!.initialize();
+      print('카메라 초기화 완료');
 
       if (mounted) {
         setState(() {
           _isInitialized = true;
         });
       }
-    } catch (e) {
-      _showError('카메라 초기화 실패: $e');
+    } catch (e, stackTrace) {
+      print('카메라 초기화 오류: $e');
+      print('Stack trace: $stackTrace');
+      if (mounted) {
+        _showError('카메라 초기화 실패: ${e.toString()}');
+      }
     }
   }
 
@@ -73,16 +87,30 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       // 사진 촬영
+      print('카메라 촬영 시작');
       final image = await _cameraController!.takePicture();
+      print('촬영 완료: ${image.path}');
+
       final imageFile = File(image.path);
+
+      // 파일 존재 확인
+      if (!await imageFile.exists()) {
+        throw Exception('촬영된 이미지 파일을 찾을 수 없습니다.');
+      }
+
+      print('이미지 파일 크기: ${await imageFile.length()} bytes');
 
       // OCR 처리로 이동
       await _processImage(imageFile);
-    } catch (e) {
-      _showError('사진 촬영 실패: $e');
-      setState(() {
-        _isProcessing = false;
-      });
+    } catch (e, stackTrace) {
+      print('사진 촬영 오류: $e');
+      print('Stack trace: $stackTrace');
+      if (mounted) {
+        _showError('사진 촬영 실패: ${e.toString()}');
+        setState(() {
+          _isProcessing = false;
+        });
+      }
     }
   }
 

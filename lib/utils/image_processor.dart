@@ -157,19 +157,22 @@ class ImageProcessor {
   /// 전체 전처리 파이프라인
   Future<File> preprocessForOcr(File imageFile) async {
     try {
-      _logger.i('이미지 전처리 시작');
+      print('이미지 전처리 시작: ${imageFile.path}');
 
-      // 1. 최적화 (리사이징 + 압축)
+      // 파일 크기 확인
+      final fileSize = await imageFile.length();
+      print('원본 파일 크기: ${fileSize / (1024 * 1024)} MB');
+
+      // 1. 최적화만 수행 (리사이징 + 압축)
+      // 콘트라스트 향상은 메모리 많이 사용하므로 제외
       File processed = await optimizeImage(imageFile);
 
-      // 2. 콘트라스트 향상
-      processed = await enhanceContrast(processed);
-
-      _logger.i('이미지 전처리 완료');
+      print('전처리 완료: ${processed.path}');
 
       return processed;
-    } catch (e) {
-      _logger.e('이미지 전처리 실패: $e');
+    } catch (e, stackTrace) {
+      print('이미지 전처리 실패: $e');
+      print('Stack trace: $stackTrace');
       rethrow;
     }
   }
