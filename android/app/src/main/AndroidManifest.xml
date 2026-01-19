@@ -42,10 +42,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- ML Kit 모델 동적 다운로드 설정 (APK 크기 감소) -->
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr_korean" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
