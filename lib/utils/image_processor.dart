@@ -154,7 +154,7 @@ class ImageProcessor {
     }
   }
 
-  /// 전체 전처리 파이프라인
+  /// 전체 전처리 파이프라인 (OCR 정확도 향상)
   Future<File> preprocessForOcr(File imageFile) async {
     try {
       print('이미지 전처리 시작: ${imageFile.path}');
@@ -163,13 +163,46 @@ class ImageProcessor {
       final fileSize = await imageFile.length();
       print('원본 파일 크기: ${fileSize / (1024 * 1024)} MB');
 
-      // 1. 최적화만 수행 (리사이징 + 압축)
-      // 콘트라스트 향상은 메모리 많이 사용하므로 제외
-      File processed = await optimizeImage(imageFile);
+      // 이미지 로드
+      final bytes = await imageFile.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
 
-      print('전처리 완료: ${processed.path}');
+      if (image == null) {
+        throw Exception('이미지 디코딩 실패');
+      }
 
-      return processed;
+      print('원본 이미지 크기: ${image.width}x${image.height}');
+
+      // 1. 리사이징 (OCR을 위해 적절한 크기 유지, 최대 2560)
+      if (image.width > 2560 || image.height > 2560) {
+        image = img.copyResize(
+          image,
+          width: image.width > image.height ? 2560 : null,
+          height: image.height >= image.width ? 2560 : null,
+          interpolation: img.Interpolation.cubic,
+        );
+        print('리사이징 완료: ${image.width}x${image.height}');
+      }
+
+      // 2. 그레이스케일 변환 (한글 OCR 정확도 향상)
+      image = img.grayscale(image);
+      print('그레이스케일 변환 완료');
+
+      // 3. 콘트라스트 향상 (텍스트 선명도 증가)
+      image = img.adjustColor(image, contrast: 1.3);
+      print('콘트라스트 향상 완료');
+
+      // 4. 저장 (높은 품질 유지)
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = '${tempDir.path}/ocr_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final tempFile = File(tempPath);
+
+      final compressedBytes = img.encodeJpg(image, quality: 95);
+      await tempFile.writeAsBytes(compressedBytes);
+
+      print('전처리 완료: ${tempFile.path} (${compressedBytes.length / 1024} KB)');
+
+      return tempFile;
     } catch (e, stackTrace) {
       print('이미지 전처리 실패: $e');
       print('Stack trace: $stackTrace');
