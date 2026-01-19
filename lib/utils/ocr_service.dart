@@ -1,32 +1,65 @@
 import 'dart:io';
 import 'dart:ui' show Rect;
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:logger/logger.dart';
 
 /// Google ML Kit을 사용한 OCR 서비스
 class OcrService {
-  final _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
-  final _logger = Logger();
+  // Korean 스크립트 사용 (한글 영수증 인식)
+  TextRecognizer? _textRecognizer;
+
+  OcrService() {
+    try {
+      print('OCR 서비스 초기화 시작 (Korean)');
+      _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
+      print('OCR 서비스 초기화 완료');
+    } catch (e) {
+      print('OCR 서비스 초기화 실패: $e');
+    }
+  }
 
   /// 이미지에서 텍스트 추출
   Future<String> extractTextFromImage(File imageFile) async {
-    try {
-      final inputImage = InputImage.fromFile(imageFile);
-      final recognizedText = await _textRecognizer.processImage(inputImage);
+    print('OCR 텍스트 추출 시작: ${imageFile.path}');
 
-      _logger.i('OCR 성공: ${recognizedText.blocks.length}개 블록 인식');
+    if (_textRecognizer == null) {
+      print('OCR: TextRecognizer가 null입니다. 재초기화 시도...');
+      _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
+    }
+
+    try {
+      // 파일 존재 확인
+      if (!await imageFile.exists()) {
+        throw Exception('이미지 파일이 존재하지 않습니다: ${imageFile.path}');
+      }
+
+      final fileSize = await imageFile.length();
+      print('OCR 이미지 파일 크기: ${fileSize / 1024} KB');
+
+      print('OCR InputImage 생성 중...');
+      final inputImage = InputImage.fromFile(imageFile);
+      print('OCR InputImage 생성 완료');
+
+      print('OCR 텍스트 인식 시작...');
+      final recognizedText = await _textRecognizer!.processImage(inputImage);
+      print('OCR 텍스트 인식 완료: ${recognizedText.blocks.length}개 블록');
+
       return recognizedText.text;
-    } catch (e) {
-      _logger.e('OCR 실패: $e');
+    } catch (e, stackTrace) {
+      print('OCR 실패: $e');
+      print('OCR Stack trace: $stackTrace');
       rethrow;
     }
   }
 
   /// 이미지에서 구조화된 텍스트 추출 (블록, 라인별)
   Future<RecognizedTextResult> extractStructuredText(File imageFile) async {
+    if (_textRecognizer == null) {
+      _textRecognizer = TextRecognizer(script: TextRecognitionScript.korean);
+    }
+
     try {
       final inputImage = InputImage.fromFile(imageFile);
-      final recognizedText = await _textRecognizer.processImage(inputImage);
+      final recognizedText = await _textRecognizer!.processImage(inputImage);
 
       final blocks = <TextBlockData>[];
 
@@ -44,14 +77,15 @@ class OcrService {
         ));
       }
 
-      _logger.i('구조화된 OCR 성공: ${blocks.length}개 블록');
+      print('구조화된 OCR 성공: ${blocks.length}개 블록');
 
       return RecognizedTextResult(
         fullText: recognizedText.text,
         blocks: blocks,
       );
-    } catch (e) {
-      _logger.e('구조화된 OCR 실패: $e');
+    } catch (e, stackTrace) {
+      print('구조화된 OCR 실패: $e');
+      print('Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -76,7 +110,14 @@ class OcrService {
 
   /// 리소스 해제
   void dispose() {
-    _textRecognizer.close();
+    print('OCR 서비스 dispose 시작');
+    try {
+      _textRecognizer?.close();
+      _textRecognizer = null;
+      print('OCR 서비스 dispose 완료');
+    } catch (e) {
+      print('OCR dispose 오류: $e');
+    }
   }
 }
 

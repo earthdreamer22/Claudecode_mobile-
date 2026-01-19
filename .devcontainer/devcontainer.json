@@ -1,0 +1,25 @@
+{
+  "name": "Flutter Android Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17",
+      "installGradle": "true"
+    }
+  },
+  "postCreateCommand": ".devcontainer/setup.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.dart-code",
+        "Dart-Code.flutter"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "ANDROID_HOME": "/home/codespace/android-sdk",
+    "ANDROID_SDK_ROOT": "/home/codespace/android-sdk",
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "PATH": "${containerEnv:PATH}:/home/codespace/flutter/bin:/home/codespace/android-sdk/cmdline-tools/latest/bin:/home/codespace/android-sdk/platform-tools"
+  }
+}
