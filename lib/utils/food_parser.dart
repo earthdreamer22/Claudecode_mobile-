@@ -50,21 +50,29 @@ class FoodParser {
 
   /// 가격 추출 (정규표현식)
   int? _extractPrice(String line) {
-    // 패턴: 숫자 + 원, 또는 숫자만 (콤마 포함 가능)
-    final patterns = [
-      RegExp(r'(\d{1,3}(?:,\d{3})*)\s*원'),
-      RegExp(r'(\d{1,3}(?:,\d{3})*)\s*$'),
-      RegExp(r'(\d{1,3}(?:,\d{3})*)\s+[^\d]'),
-    ];
+    // 숫자만 있는 라인은 건너뜀 (가격 전용 라인)
+    final trimmed = line.replaceAll(RegExp(r'[\s,]'), '');
+    if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+      return null; // 숫자만 있는 라인은 품목이 아님
+    }
 
-    for (final pattern in patterns) {
-      final match = pattern.firstMatch(line);
-      if (match != null) {
-        final priceStr = match.group(1)?.replaceAll(',', '');
-        final price = int.tryParse(priceStr ?? '');
-        if (price != null && price >= 100 && price <= 1000000) {
-          return price;
-        }
+    // 한글이 없는 라인도 건너뜀 (품목명이 반드시 있어야 함)
+    if (!RegExp(r'[가-힣]').hasMatch(line)) {
+      return null;
+    }
+
+    // 모든 가격 패턴 찾기 (콤마 포함 숫자)
+    final pricePattern = RegExp(r'(\d{1,3}(?:,\d{3})+|\d{3,})');
+    final matches = pricePattern.allMatches(line).toList();
+
+    if (matches.isEmpty) return null;
+
+    // 마지막 가격을 단가로 사용 (영수증 형식: 품목 수량 단가)
+    for (int i = matches.length - 1; i >= 0; i--) {
+      final priceStr = matches[i].group(1)?.replaceAll(',', '');
+      final price = int.tryParse(priceStr ?? '');
+      if (price != null && price >= 500 && price <= 500000) {
+        return price;
       }
     }
 
@@ -73,30 +81,34 @@ class FoodParser {
 
   /// 제품명 추출
   String _extractProductName(String line, int price) {
-    // 가격 앞부분을 제품명으로 간주
-    final priceStr = price.toString();
-    final priceWithComma = _formatPrice(price);
+    // 숫자와 특수문자를 기준으로 품목명 추출
+    // 영수증 형식: "슈가코팅 글레이즈 도넛(6입)    1   13,800"
 
-    // 가격 문자열 위치 찾기
-    int priceIndex = line.indexOf(priceWithComma);
-    if (priceIndex == -1) {
-      priceIndex = line.indexOf(priceStr);
-    }
-    if (priceIndex == -1) {
-      priceIndex = line.lastIndexOf(RegExp(r'\d'));
-      if (priceIndex != -1) priceIndex++;
-    }
+    // 첫 번째 숫자(수량) 위치 찾기
+    final firstNumberMatch = RegExp(r'\s+\d+\s+').firstMatch(line);
 
     String productName = '';
-    if (priceIndex > 0) {
-      productName = line.substring(0, priceIndex).trim();
+    if (firstNumberMatch != null) {
+      // 첫 번째 숫자(수량) 앞부분이 품목명
+      productName = line.substring(0, firstNumberMatch.start).trim();
     } else {
-      productName = line.replaceAll(RegExp(r'[\d,원\s]+$'), '').trim();
+      // 숫자 패턴이 없으면 가격 앞부분 사용
+      final priceWithComma = _formatPrice(price);
+      int priceIndex = line.indexOf(priceWithComma);
+      if (priceIndex == -1) {
+        priceIndex = line.indexOf(price.toString());
+      }
+      if (priceIndex > 0) {
+        productName = line.substring(0, priceIndex).trim();
+      } else {
+        productName = line.replaceAll(RegExp(r'[\d,원\s]+$'), '').trim();
+      }
     }
 
-    // 특수문자 정리
+    // 특수문자 및 끝의 숫자 정리
     productName = productName
         .replaceAll(RegExp(r'[*●○▲▼◆◇]'), '')
+        .replaceAll(RegExp(r'\s+\d+$'), '')  // 끝에 붙은 수량 제거
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
