@@ -6,9 +6,8 @@ import 'package:logger/logger.dart';
 class LlmParserService {
   final _logger = Logger();
 
-  // Vercel 배포 후 실제 URL로 변경 필요
-  // 예: https://your-project.vercel.app/api/parse-receipt
-  static const String _apiUrl = 'https://YOUR_VERCEL_URL/api/parse-receipt';
+  // Vercel 배포 URL
+  static const String _apiUrl = 'https://claudecode-mobile.vercel.app/api/parse-receipt';
 
   /// OCR 텍스트를 LLM으로 파싱
   Future<LlmParseResult?> parseReceipt({
