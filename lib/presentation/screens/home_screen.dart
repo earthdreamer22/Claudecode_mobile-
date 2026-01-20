@@ -5,6 +5,7 @@ import '../../config/constants.dart';
 import '../providers/user_provider.dart';
 import 'camera_screen.dart';
 import 'prediction_screen.dart';
+import 'receipt_list_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -165,9 +166,10 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: 영수증 목록 화면 이동
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('영수증 목록 (Phase 7에서 구현)')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ReceiptListScreen(),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.receipt_long),
