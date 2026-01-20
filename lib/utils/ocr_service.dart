@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' show Rect;
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'llm_parser_service.dart';
 
 /// Google ML Kit을 사용한 OCR 서비스
 class OcrService {
@@ -42,6 +43,22 @@ class OcrService {
       print('OCR 텍스트 인식 시작...');
       final recognizedText = await _textRecognizer!.processImage(inputImage);
       print('OCR 텍스트 인식 완료: ${recognizedText.blocks.length}개 블록');
+
+      // OCR Raw 텍스트 로그 출력
+      print('=== OCR RAW TEXT START ===');
+      print(recognizedText.text);
+      print('=== OCR RAW TEXT END ===');
+
+      // 블록별 상세 로그
+      print('=== OCR BLOCKS DETAIL ===');
+      for (int i = 0; i < recognizedText.blocks.length; i++) {
+        final block = recognizedText.blocks[i];
+        print('Block[$i]: "${block.text}"');
+        for (int j = 0; j < block.lines.length; j++) {
+          print('  Line[$j]: "${block.lines[j].text}"');
+        }
+      }
+      print('=== OCR BLOCKS END ===');
 
       return recognizedText.text;
     } catch (e, stackTrace) {
@@ -106,6 +123,44 @@ class OcrService {
     if (block.lines.length > 2) confidence += 0.05;
 
     return confidence > 1.0 ? 1.0 : confidence;
+  }
+
+  /// OCR + LLM 파싱 통합 (권장)
+  Future<LlmParseResult?> extractAndParseWithLlm(File imageFile) async {
+    print('OCR + LLM 파싱 시작');
+
+    try {
+      // 1. OCR로 텍스트 추출
+      final structuredResult = await extractStructuredText(imageFile);
+
+      // 2. 블록 데이터 준비
+      final blocks = structuredResult.blocks.map((block) => {
+        'text': block.text,
+        'lines': block.lines,
+      }).toList();
+
+      // 3. LLM으로 파싱
+      final llmParser = LlmParserService();
+      final result = await llmParser.parseReceipt(
+        ocrText: structuredResult.fullText,
+        blocks: blocks,
+      );
+
+      if (result != null) {
+        print('LLM 파싱 성공: ${result.items.length}개 항목');
+        for (final item in result.items) {
+          print('  - ${item.name}: ${item.quantity}개 x ${item.price}원');
+        }
+      } else {
+        print('LLM 파싱 실패 - fallback 필요');
+      }
+
+      return result;
+    } catch (e, stackTrace) {
+      print('OCR + LLM 파싱 오류: $e');
+      print('Stack trace: $stackTrace');
+      return null;
+    }
   }
 
   /// 리소스 해제

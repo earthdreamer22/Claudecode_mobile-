@@ -1,0 +1,12 @@
+{
+  "name": "receipt-parser-api",
+  "version": "1.0.0",
+  "description": "OCR 영수증 파싱 API (OpenAI)",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "openai": "^4.20.0"
+  }
+}
