@@ -152,17 +152,12 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         );
       }
 
-      // LLM 영양 분석 호출 및 저장 (백그라운드)
-      _fetchAndSaveNutritionAnalysis(user.id, receiptRepo);
-
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('영수증이 저장되었습니다 (${_parsedItems.length}개 항목)'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // AI 분석 모달 표시 및 LLM 호출
+      await _showAiAnalysisDialog(user.id, receiptRepo);
+
+      if (!mounted) return;
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -177,12 +172,22 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     }
   }
 
-  /// LLM 영양 분석을 호출하고 DB에 저장 (백그라운드 실행)
-  Future<void> _fetchAndSaveNutritionAnalysis(int userId, dynamic receiptRepo) async {
+  /// AI 분석 다이얼로그 표시 및 LLM 호출
+  Future<void> _showAiAnalysisDialog(int userId, dynamic receiptRepo) async {
+    // 다이얼로그 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const _AiAnalysisLoadingDialog(),
+    );
+
     try {
       final userAsync = ref.read(userProvider);
       final user = userAsync.value;
-      if (user == null) return;
+      if (user == null) {
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
 
       // 사용자의 전체 영수증 목록 조회
       final receipts = await receiptRepo.getReceiptsByUser(userId);
@@ -207,33 +212,36 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         }
       }
 
-      if (purchaseHistory.isEmpty) return;
+      if (purchaseHistory.isNotEmpty) {
+        // 사용자 프로필 생성
+        final userProfile = {
+          'age': user.age,
+          'gender': user.gender,
+          'height': user.height,
+          'weight': user.weight,
+        };
 
-      // 사용자 프로필 생성
-      final userProfile = {
-        'age': user.age,
-        'gender': user.gender,
-        'height': user.height,
-        'weight': user.weight,
-      };
-
-      // LLM 영양 조언 호출
-      final llmService = LlmParserService();
-      final advice = await llmService.getNutritionAdvice(
-        userProfile: userProfile,
-        purchaseHistory: purchaseHistory,
-      );
-
-      if (advice != null) {
-        // DB에 저장
-        await receiptRepo.saveNutritionAnalysis(
-          userId: userId,
-          advice: advice,
+        // LLM 영양 조언 호출
+        final llmService = LlmParserService();
+        final advice = await llmService.getNutritionAdvice(
+          userProfile: userProfile,
+          purchaseHistory: purchaseHistory,
         );
-        print('영양 분석 결과 저장 완료');
+
+        if (advice != null) {
+          // DB에 저장
+          await receiptRepo.saveNutritionAnalysis(
+            userId: userId,
+            advice: advice,
+          );
+          print('영양 분석 결과 저장 완료');
+        }
       }
     } catch (e) {
       print('영양 분석 저장 실패: $e');
+    } finally {
+      // 다이얼로그 닫기
+      if (mounted) Navigator.of(context).pop();
     }
   }
 
@@ -819,6 +827,177 @@ class _AddFoodItemDialogState extends State<_AddFoodItemDialog> {
           child: Text(widget.isEdit ? '수정' : '추가'),
         ),
       ],
+    );
+  }
+}
+
+/// AI 분석 로딩 다이얼로그
+class _AiAnalysisLoadingDialog extends StatefulWidget {
+  const _AiAnalysisLoadingDialog();
+
+  @override
+  State<_AiAnalysisLoadingDialog> createState() => _AiAnalysisLoadingDialogState();
+}
+
+class _AiAnalysisLoadingDialogState extends State<_AiAnalysisLoadingDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+  int _dotCount = 0;
+
+  final List<String> _messages = [
+    'AI가 영수증을 분석하고 있습니다',
+    '구매 패턴을 파악하고 있습니다',
+    '영양 정보를 계산하고 있습니다',
+    '맞춤형 건강 조언을 생성하고 있습니다',
+  ];
+  int _messageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    // 점 애니메이션
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _dotCount = (_dotCount + 1) % 4;
+        });
+        return true;
+      }
+      return false;
+    });
+
+    // 메시지 변경
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        setState(() {
+          _messageIndex = (_messageIndex + 1) % _messages.length;
+        });
+        return true;
+      }
+      return false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.3),
+              blurRadius: 20,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // AI 아이콘 애니메이션
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Opacity(
+                    opacity: _opacityAnimation.value,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.blue.shade400,
+                            Colors.purple.shade400,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.4),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.psychology,
+                        size: 48,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // 메인 메시지
+            Text(
+              '${_messages[_messageIndex]}${'.' * _dotCount}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+
+            // 프로그레스 바
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                minHeight: 6,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Colors.blue.shade400,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 서브 메시지
+            Text(
+              '잠시만 기다려주세요',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

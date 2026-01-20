@@ -2,16 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
+import '../../utils/llm_parser_service.dart';
 import '../providers/user_provider.dart';
+import '../providers/database_provider.dart';
 import 'camera_screen.dart';
 import 'prediction_screen.dart';
 import 'receipt_list_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  NutritionAdviceResult? _cachedAdvice;
+  bool _isLoadingAdvice = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCachedAdvice();
+  }
+
+  Future<void> _loadCachedAdvice() async {
+    final userAsync = ref.read(userProvider);
+    final user = userAsync.value;
+    if (user == null) {
+      setState(() => _isLoadingAdvice = false);
+      return;
+    }
+
+    final receiptRepo = ref.read(receiptRepositoryProvider);
+    final advice = await receiptRepo.getLatestNutritionAnalysis(user.id);
+
+    if (mounted) {
+      setState(() {
+        _cachedAdvice = advice;
+        _isLoadingAdvice = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userAsync = ref.watch(userProvider);
 
     return Scaffold(
@@ -113,39 +148,8 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // 위험도 카드 (임시)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppConstants.paddingMedium),
-                    child: Column(
-                      children: [
-                        Text(
-                          '대사증후군 위험도',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 16),
-                        const SizedBox(
-                          height: 150,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.analytics,
-                                    size: 64, color: Colors.grey),
-                                SizedBox(height: 12),
-                                Text(
-                                  '영수증을 촬영하여\n위험도를 확인하세요',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // AI 종합 평가 카드
+                _buildAiAssessmentCard(context),
                 const SizedBox(height: 16),
 
                 // 액션 버튼들
@@ -229,5 +233,174 @@ class HomeScreen extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildAiAssessmentCard(BuildContext context) {
+    if (_isLoadingAdvice) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingLarge),
+          child: Column(
+            children: [
+              Text(
+                'AI 종합 평가',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 8),
+              const Text('불러오는 중...'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_cachedAdvice == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(AppConstants.paddingLarge),
+          child: Column(
+            children: [
+              Text(
+                'AI 종합 평가',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Icon(Icons.receipt_long, size: 48, color: Colors.grey[400]),
+              const SizedBox(height: 12),
+              Text(
+                '영수증을 촬영하여\nAI 건강 분석을 받아보세요',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final assessment = _cachedAdvice!.overallAssessment;
+    final levelColor = _getLevelColor(assessment.level);
+
+    return Card(
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const PredictionScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(AppConstants.paddingLarge),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.blue.withOpacity(0.1),
+                Colors.purple.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.psychology, color: Colors.blue, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'AI 종합 평가',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right, color: Colors.grey[400]),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        '${assessment.score}',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: levelColor,
+                        ),
+                      ),
+                      const Text('건강 점수', style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: levelColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      assessment.level,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: levelColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  assessment.summary,
+                  style: const TextStyle(fontSize: 13, height: 1.4),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '탭하여 상세 분석 보기',
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getLevelColor(String level) {
+    switch (level) {
+      case '양호':
+        return Colors.green;
+      case '주의':
+        return Colors.orange;
+      case '경고':
+        return Colors.deepOrange;
+      case '위험':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }
