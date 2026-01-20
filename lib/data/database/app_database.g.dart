@@ -1501,18 +1501,598 @@ class FoodItemsCompanion extends UpdateCompanion<FoodItemData> {
   }
 }
 
+class $NutritionAnalysesTable extends NutritionAnalyses
+    with TableInfo<$NutritionAnalysesTable, NutritionAnalysisData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NutritionAnalysesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES user_profile (id)'));
+  static const VerificationMeta _analysisDateMeta =
+      const VerificationMeta('analysisDate');
+  @override
+  late final GeneratedColumn<DateTime> analysisDate = GeneratedColumn<DateTime>(
+      'analysis_date', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _overallScoreMeta =
+      const VerificationMeta('overallScore');
+  @override
+  late final GeneratedColumn<int> overallScore = GeneratedColumn<int>(
+      'overall_score', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _overallLevelMeta =
+      const VerificationMeta('overallLevel');
+  @override
+  late final GeneratedColumn<String> overallLevel = GeneratedColumn<String>(
+      'overall_level', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _overallSummaryMeta =
+      const VerificationMeta('overallSummary');
+  @override
+  late final GeneratedColumn<String> overallSummary = GeneratedColumn<String>(
+      'overall_summary', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _personalizedTipsMeta =
+      const VerificationMeta('personalizedTips');
+  @override
+  late final GeneratedColumn<String> personalizedTips = GeneratedColumn<String>(
+      'personalized_tips', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _futurePredictionsMeta =
+      const VerificationMeta('futurePredictions');
+  @override
+  late final GeneratedColumn<String> futurePredictions =
+      GeneratedColumn<String>('future_predictions', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _actionPlanMeta =
+      const VerificationMeta('actionPlan');
+  @override
+  late final GeneratedColumn<String> actionPlan = GeneratedColumn<String>(
+      'action_plan', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _categoryAnalysisMeta =
+      const VerificationMeta('categoryAnalysis');
+  @override
+  late final GeneratedColumn<String> categoryAnalysis = GeneratedColumn<String>(
+      'category_analysis', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        userId,
+        analysisDate,
+        overallScore,
+        overallLevel,
+        overallSummary,
+        personalizedTips,
+        futurePredictions,
+        actionPlan,
+        categoryAnalysis,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'nutrition_analyses';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<NutritionAnalysisData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('analysis_date')) {
+      context.handle(
+          _analysisDateMeta,
+          analysisDate.isAcceptableOrUnknown(
+              data['analysis_date']!, _analysisDateMeta));
+    } else if (isInserting) {
+      context.missing(_analysisDateMeta);
+    }
+    if (data.containsKey('overall_score')) {
+      context.handle(
+          _overallScoreMeta,
+          overallScore.isAcceptableOrUnknown(
+              data['overall_score']!, _overallScoreMeta));
+    } else if (isInserting) {
+      context.missing(_overallScoreMeta);
+    }
+    if (data.containsKey('overall_level')) {
+      context.handle(
+          _overallLevelMeta,
+          overallLevel.isAcceptableOrUnknown(
+              data['overall_level']!, _overallLevelMeta));
+    } else if (isInserting) {
+      context.missing(_overallLevelMeta);
+    }
+    if (data.containsKey('overall_summary')) {
+      context.handle(
+          _overallSummaryMeta,
+          overallSummary.isAcceptableOrUnknown(
+              data['overall_summary']!, _overallSummaryMeta));
+    } else if (isInserting) {
+      context.missing(_overallSummaryMeta);
+    }
+    if (data.containsKey('personalized_tips')) {
+      context.handle(
+          _personalizedTipsMeta,
+          personalizedTips.isAcceptableOrUnknown(
+              data['personalized_tips']!, _personalizedTipsMeta));
+    } else if (isInserting) {
+      context.missing(_personalizedTipsMeta);
+    }
+    if (data.containsKey('future_predictions')) {
+      context.handle(
+          _futurePredictionsMeta,
+          futurePredictions.isAcceptableOrUnknown(
+              data['future_predictions']!, _futurePredictionsMeta));
+    } else if (isInserting) {
+      context.missing(_futurePredictionsMeta);
+    }
+    if (data.containsKey('action_plan')) {
+      context.handle(
+          _actionPlanMeta,
+          actionPlan.isAcceptableOrUnknown(
+              data['action_plan']!, _actionPlanMeta));
+    } else if (isInserting) {
+      context.missing(_actionPlanMeta);
+    }
+    if (data.containsKey('category_analysis')) {
+      context.handle(
+          _categoryAnalysisMeta,
+          categoryAnalysis.isAcceptableOrUnknown(
+              data['category_analysis']!, _categoryAnalysisMeta));
+    } else if (isInserting) {
+      context.missing(_categoryAnalysisMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NutritionAnalysisData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NutritionAnalysisData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
+      analysisDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}analysis_date'])!,
+      overallScore: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}overall_score'])!,
+      overallLevel: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}overall_level'])!,
+      overallSummary: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}overall_summary'])!,
+      personalizedTips: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}personalized_tips'])!,
+      futurePredictions: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}future_predictions'])!,
+      actionPlan: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}action_plan'])!,
+      categoryAnalysis: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}category_analysis'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $NutritionAnalysesTable createAlias(String alias) {
+    return $NutritionAnalysesTable(attachedDatabase, alias);
+  }
+}
+
+class NutritionAnalysisData extends DataClass
+    implements Insertable<NutritionAnalysisData> {
+  final int id;
+  final int userId;
+  final DateTime analysisDate;
+  final int overallScore;
+  final String overallLevel;
+  final String overallSummary;
+  final String personalizedTips;
+  final String futurePredictions;
+  final String actionPlan;
+  final String categoryAnalysis;
+  final DateTime createdAt;
+  const NutritionAnalysisData(
+      {required this.id,
+      required this.userId,
+      required this.analysisDate,
+      required this.overallScore,
+      required this.overallLevel,
+      required this.overallSummary,
+      required this.personalizedTips,
+      required this.futurePredictions,
+      required this.actionPlan,
+      required this.categoryAnalysis,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<int>(userId);
+    map['analysis_date'] = Variable<DateTime>(analysisDate);
+    map['overall_score'] = Variable<int>(overallScore);
+    map['overall_level'] = Variable<String>(overallLevel);
+    map['overall_summary'] = Variable<String>(overallSummary);
+    map['personalized_tips'] = Variable<String>(personalizedTips);
+    map['future_predictions'] = Variable<String>(futurePredictions);
+    map['action_plan'] = Variable<String>(actionPlan);
+    map['category_analysis'] = Variable<String>(categoryAnalysis);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  NutritionAnalysesCompanion toCompanion(bool nullToAbsent) {
+    return NutritionAnalysesCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      analysisDate: Value(analysisDate),
+      overallScore: Value(overallScore),
+      overallLevel: Value(overallLevel),
+      overallSummary: Value(overallSummary),
+      personalizedTips: Value(personalizedTips),
+      futurePredictions: Value(futurePredictions),
+      actionPlan: Value(actionPlan),
+      categoryAnalysis: Value(categoryAnalysis),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory NutritionAnalysisData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NutritionAnalysisData(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<int>(json['userId']),
+      analysisDate: serializer.fromJson<DateTime>(json['analysisDate']),
+      overallScore: serializer.fromJson<int>(json['overallScore']),
+      overallLevel: serializer.fromJson<String>(json['overallLevel']),
+      overallSummary: serializer.fromJson<String>(json['overallSummary']),
+      personalizedTips: serializer.fromJson<String>(json['personalizedTips']),
+      futurePredictions: serializer.fromJson<String>(json['futurePredictions']),
+      actionPlan: serializer.fromJson<String>(json['actionPlan']),
+      categoryAnalysis: serializer.fromJson<String>(json['categoryAnalysis']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<int>(userId),
+      'analysisDate': serializer.toJson<DateTime>(analysisDate),
+      'overallScore': serializer.toJson<int>(overallScore),
+      'overallLevel': serializer.toJson<String>(overallLevel),
+      'overallSummary': serializer.toJson<String>(overallSummary),
+      'personalizedTips': serializer.toJson<String>(personalizedTips),
+      'futurePredictions': serializer.toJson<String>(futurePredictions),
+      'actionPlan': serializer.toJson<String>(actionPlan),
+      'categoryAnalysis': serializer.toJson<String>(categoryAnalysis),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  NutritionAnalysisData copyWith(
+          {int? id,
+          int? userId,
+          DateTime? analysisDate,
+          int? overallScore,
+          String? overallLevel,
+          String? overallSummary,
+          String? personalizedTips,
+          String? futurePredictions,
+          String? actionPlan,
+          String? categoryAnalysis,
+          DateTime? createdAt}) =>
+      NutritionAnalysisData(
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        analysisDate: analysisDate ?? this.analysisDate,
+        overallScore: overallScore ?? this.overallScore,
+        overallLevel: overallLevel ?? this.overallLevel,
+        overallSummary: overallSummary ?? this.overallSummary,
+        personalizedTips: personalizedTips ?? this.personalizedTips,
+        futurePredictions: futurePredictions ?? this.futurePredictions,
+        actionPlan: actionPlan ?? this.actionPlan,
+        categoryAnalysis: categoryAnalysis ?? this.categoryAnalysis,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  NutritionAnalysisData copyWithCompanion(NutritionAnalysesCompanion data) {
+    return NutritionAnalysisData(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      analysisDate: data.analysisDate.present
+          ? data.analysisDate.value
+          : this.analysisDate,
+      overallScore: data.overallScore.present
+          ? data.overallScore.value
+          : this.overallScore,
+      overallLevel: data.overallLevel.present
+          ? data.overallLevel.value
+          : this.overallLevel,
+      overallSummary: data.overallSummary.present
+          ? data.overallSummary.value
+          : this.overallSummary,
+      personalizedTips: data.personalizedTips.present
+          ? data.personalizedTips.value
+          : this.personalizedTips,
+      futurePredictions: data.futurePredictions.present
+          ? data.futurePredictions.value
+          : this.futurePredictions,
+      actionPlan:
+          data.actionPlan.present ? data.actionPlan.value : this.actionPlan,
+      categoryAnalysis: data.categoryAnalysis.present
+          ? data.categoryAnalysis.value
+          : this.categoryAnalysis,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NutritionAnalysisData(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('analysisDate: $analysisDate, ')
+          ..write('overallScore: $overallScore, ')
+          ..write('overallLevel: $overallLevel, ')
+          ..write('overallSummary: $overallSummary, ')
+          ..write('personalizedTips: $personalizedTips, ')
+          ..write('futurePredictions: $futurePredictions, ')
+          ..write('actionPlan: $actionPlan, ')
+          ..write('categoryAnalysis: $categoryAnalysis, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      userId,
+      analysisDate,
+      overallScore,
+      overallLevel,
+      overallSummary,
+      personalizedTips,
+      futurePredictions,
+      actionPlan,
+      categoryAnalysis,
+      createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NutritionAnalysisData &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.analysisDate == this.analysisDate &&
+          other.overallScore == this.overallScore &&
+          other.overallLevel == this.overallLevel &&
+          other.overallSummary == this.overallSummary &&
+          other.personalizedTips == this.personalizedTips &&
+          other.futurePredictions == this.futurePredictions &&
+          other.actionPlan == this.actionPlan &&
+          other.categoryAnalysis == this.categoryAnalysis &&
+          other.createdAt == this.createdAt);
+}
+
+class NutritionAnalysesCompanion
+    extends UpdateCompanion<NutritionAnalysisData> {
+  final Value<int> id;
+  final Value<int> userId;
+  final Value<DateTime> analysisDate;
+  final Value<int> overallScore;
+  final Value<String> overallLevel;
+  final Value<String> overallSummary;
+  final Value<String> personalizedTips;
+  final Value<String> futurePredictions;
+  final Value<String> actionPlan;
+  final Value<String> categoryAnalysis;
+  final Value<DateTime> createdAt;
+  const NutritionAnalysesCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.analysisDate = const Value.absent(),
+    this.overallScore = const Value.absent(),
+    this.overallLevel = const Value.absent(),
+    this.overallSummary = const Value.absent(),
+    this.personalizedTips = const Value.absent(),
+    this.futurePredictions = const Value.absent(),
+    this.actionPlan = const Value.absent(),
+    this.categoryAnalysis = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  NutritionAnalysesCompanion.insert({
+    this.id = const Value.absent(),
+    required int userId,
+    required DateTime analysisDate,
+    required int overallScore,
+    required String overallLevel,
+    required String overallSummary,
+    required String personalizedTips,
+    required String futurePredictions,
+    required String actionPlan,
+    required String categoryAnalysis,
+    this.createdAt = const Value.absent(),
+  })  : userId = Value(userId),
+        analysisDate = Value(analysisDate),
+        overallScore = Value(overallScore),
+        overallLevel = Value(overallLevel),
+        overallSummary = Value(overallSummary),
+        personalizedTips = Value(personalizedTips),
+        futurePredictions = Value(futurePredictions),
+        actionPlan = Value(actionPlan),
+        categoryAnalysis = Value(categoryAnalysis);
+  static Insertable<NutritionAnalysisData> custom({
+    Expression<int>? id,
+    Expression<int>? userId,
+    Expression<DateTime>? analysisDate,
+    Expression<int>? overallScore,
+    Expression<String>? overallLevel,
+    Expression<String>? overallSummary,
+    Expression<String>? personalizedTips,
+    Expression<String>? futurePredictions,
+    Expression<String>? actionPlan,
+    Expression<String>? categoryAnalysis,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (analysisDate != null) 'analysis_date': analysisDate,
+      if (overallScore != null) 'overall_score': overallScore,
+      if (overallLevel != null) 'overall_level': overallLevel,
+      if (overallSummary != null) 'overall_summary': overallSummary,
+      if (personalizedTips != null) 'personalized_tips': personalizedTips,
+      if (futurePredictions != null) 'future_predictions': futurePredictions,
+      if (actionPlan != null) 'action_plan': actionPlan,
+      if (categoryAnalysis != null) 'category_analysis': categoryAnalysis,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  NutritionAnalysesCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? userId,
+      Value<DateTime>? analysisDate,
+      Value<int>? overallScore,
+      Value<String>? overallLevel,
+      Value<String>? overallSummary,
+      Value<String>? personalizedTips,
+      Value<String>? futurePredictions,
+      Value<String>? actionPlan,
+      Value<String>? categoryAnalysis,
+      Value<DateTime>? createdAt}) {
+    return NutritionAnalysesCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      analysisDate: analysisDate ?? this.analysisDate,
+      overallScore: overallScore ?? this.overallScore,
+      overallLevel: overallLevel ?? this.overallLevel,
+      overallSummary: overallSummary ?? this.overallSummary,
+      personalizedTips: personalizedTips ?? this.personalizedTips,
+      futurePredictions: futurePredictions ?? this.futurePredictions,
+      actionPlan: actionPlan ?? this.actionPlan,
+      categoryAnalysis: categoryAnalysis ?? this.categoryAnalysis,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (analysisDate.present) {
+      map['analysis_date'] = Variable<DateTime>(analysisDate.value);
+    }
+    if (overallScore.present) {
+      map['overall_score'] = Variable<int>(overallScore.value);
+    }
+    if (overallLevel.present) {
+      map['overall_level'] = Variable<String>(overallLevel.value);
+    }
+    if (overallSummary.present) {
+      map['overall_summary'] = Variable<String>(overallSummary.value);
+    }
+    if (personalizedTips.present) {
+      map['personalized_tips'] = Variable<String>(personalizedTips.value);
+    }
+    if (futurePredictions.present) {
+      map['future_predictions'] = Variable<String>(futurePredictions.value);
+    }
+    if (actionPlan.present) {
+      map['action_plan'] = Variable<String>(actionPlan.value);
+    }
+    if (categoryAnalysis.present) {
+      map['category_analysis'] = Variable<String>(categoryAnalysis.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NutritionAnalysesCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('analysisDate: $analysisDate, ')
+          ..write('overallScore: $overallScore, ')
+          ..write('overallLevel: $overallLevel, ')
+          ..write('overallSummary: $overallSummary, ')
+          ..write('personalizedTips: $personalizedTips, ')
+          ..write('futurePredictions: $futurePredictions, ')
+          ..write('actionPlan: $actionPlan, ')
+          ..write('categoryAnalysis: $categoryAnalysis, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $UserProfileTable userProfile = $UserProfileTable(this);
   late final $ReceiptsTable receipts = $ReceiptsTable(this);
   late final $FoodItemsTable foodItems = $FoodItemsTable(this);
+  late final $NutritionAnalysesTable nutritionAnalyses =
+      $NutritionAnalysesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [userProfile, receipts, foodItems];
+      [userProfile, receipts, foodItems, nutritionAnalyses];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -1570,6 +2150,24 @@ final class $$UserProfileTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$NutritionAnalysesTable,
+      List<NutritionAnalysisData>> _nutritionAnalysesRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.nutritionAnalyses,
+          aliasName: $_aliasNameGenerator(
+              db.userProfile.id, db.nutritionAnalyses.userId));
+
+  $$NutritionAnalysesTableProcessedTableManager get nutritionAnalysesRefs {
+    final manager =
+        $$NutritionAnalysesTableTableManager($_db, $_db.nutritionAnalyses)
+            .filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_nutritionAnalysesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$UserProfileTableFilterComposer
@@ -1622,6 +2220,27 @@ class $$UserProfileTableFilterComposer
             $$ReceiptsTableFilterComposer(
               $db: $db,
               $table: $db.receipts,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> nutritionAnalysesRefs(
+      Expression<bool> Function($$NutritionAnalysesTableFilterComposer f) f) {
+    final $$NutritionAnalysesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.nutritionAnalyses,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$NutritionAnalysesTableFilterComposer(
+              $db: $db,
+              $table: $db.nutritionAnalyses,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1726,6 +2345,28 @@ class $$UserProfileTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> nutritionAnalysesRefs<T extends Object>(
+      Expression<T> Function($$NutritionAnalysesTableAnnotationComposer a) f) {
+    final $$NutritionAnalysesTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.nutritionAnalyses,
+            getReferencedColumn: (t) => t.userId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$NutritionAnalysesTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.nutritionAnalyses,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$UserProfileTableTableManager extends RootTableManager<
@@ -1739,7 +2380,7 @@ class $$UserProfileTableTableManager extends RootTableManager<
     $$UserProfileTableUpdateCompanionBuilder,
     (UserProfileData, $$UserProfileTableReferences),
     UserProfileData,
-    PrefetchHooks Function({bool receiptsRefs})> {
+    PrefetchHooks Function({bool receiptsRefs, bool nutritionAnalysesRefs})> {
   $$UserProfileTableTableManager(_$AppDatabase db, $UserProfileTable table)
       : super(TableManagerState(
           db: db,
@@ -1800,10 +2441,14 @@ class $$UserProfileTableTableManager extends RootTableManager<
                     $$UserProfileTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({receiptsRefs = false}) {
+          prefetchHooksCallback: (
+              {receiptsRefs = false, nutritionAnalysesRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (receiptsRefs) db.receipts],
+              explicitlyWatchedTables: [
+                if (receiptsRefs) db.receipts,
+                if (nutritionAnalysesRefs) db.nutritionAnalyses
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -1816,6 +2461,19 @@ class $$UserProfileTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$UserProfileTableReferences(db, table, p0)
                                 .receiptsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.userId == item.id),
+                        typedResults: items),
+                  if (nutritionAnalysesRefs)
+                    await $_getPrefetchedData<UserProfileData,
+                            $UserProfileTable, NutritionAnalysisData>(
+                        currentTable: table,
+                        referencedTable: $$UserProfileTableReferences
+                            ._nutritionAnalysesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$UserProfileTableReferences(db, table, p0)
+                                .nutritionAnalysesRefs,
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.userId == item.id),
@@ -1838,7 +2496,7 @@ typedef $$UserProfileTableProcessedTableManager = ProcessedTableManager<
     $$UserProfileTableUpdateCompanionBuilder,
     (UserProfileData, $$UserProfileTableReferences),
     UserProfileData,
-    PrefetchHooks Function({bool receiptsRefs})>;
+    PrefetchHooks Function({bool receiptsRefs, bool nutritionAnalysesRefs})>;
 typedef $$ReceiptsTableCreateCompanionBuilder = ReceiptsCompanion Function({
   Value<int> id,
   required int userId,
@@ -2607,6 +3265,379 @@ typedef $$FoodItemsTableProcessedTableManager = ProcessedTableManager<
     (FoodItemData, $$FoodItemsTableReferences),
     FoodItemData,
     PrefetchHooks Function({bool receiptId})>;
+typedef $$NutritionAnalysesTableCreateCompanionBuilder
+    = NutritionAnalysesCompanion Function({
+  Value<int> id,
+  required int userId,
+  required DateTime analysisDate,
+  required int overallScore,
+  required String overallLevel,
+  required String overallSummary,
+  required String personalizedTips,
+  required String futurePredictions,
+  required String actionPlan,
+  required String categoryAnalysis,
+  Value<DateTime> createdAt,
+});
+typedef $$NutritionAnalysesTableUpdateCompanionBuilder
+    = NutritionAnalysesCompanion Function({
+  Value<int> id,
+  Value<int> userId,
+  Value<DateTime> analysisDate,
+  Value<int> overallScore,
+  Value<String> overallLevel,
+  Value<String> overallSummary,
+  Value<String> personalizedTips,
+  Value<String> futurePredictions,
+  Value<String> actionPlan,
+  Value<String> categoryAnalysis,
+  Value<DateTime> createdAt,
+});
+
+final class $$NutritionAnalysesTableReferences extends BaseReferences<
+    _$AppDatabase, $NutritionAnalysesTable, NutritionAnalysisData> {
+  $$NutritionAnalysesTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $UserProfileTable _userIdTable(_$AppDatabase db) =>
+      db.userProfile.createAlias(
+          $_aliasNameGenerator(db.nutritionAnalyses.userId, db.userProfile.id));
+
+  $$UserProfileTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<int>('user_id')!;
+
+    final manager = $$UserProfileTableTableManager($_db, $_db.userProfile)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$NutritionAnalysesTableFilterComposer
+    extends Composer<_$AppDatabase, $NutritionAnalysesTable> {
+  $$NutritionAnalysesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get analysisDate => $composableBuilder(
+      column: $table.analysisDate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get overallScore => $composableBuilder(
+      column: $table.overallScore, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get overallLevel => $composableBuilder(
+      column: $table.overallLevel, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get overallSummary => $composableBuilder(
+      column: $table.overallSummary,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get personalizedTips => $composableBuilder(
+      column: $table.personalizedTips,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get futurePredictions => $composableBuilder(
+      column: $table.futurePredictions,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get actionPlan => $composableBuilder(
+      column: $table.actionPlan, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get categoryAnalysis => $composableBuilder(
+      column: $table.categoryAnalysis,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$UserProfileTableFilterComposer get userId {
+    final $$UserProfileTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.userProfile,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UserProfileTableFilterComposer(
+              $db: $db,
+              $table: $db.userProfile,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$NutritionAnalysesTableOrderingComposer
+    extends Composer<_$AppDatabase, $NutritionAnalysesTable> {
+  $$NutritionAnalysesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get analysisDate => $composableBuilder(
+      column: $table.analysisDate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get overallScore => $composableBuilder(
+      column: $table.overallScore,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get overallLevel => $composableBuilder(
+      column: $table.overallLevel,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get overallSummary => $composableBuilder(
+      column: $table.overallSummary,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get personalizedTips => $composableBuilder(
+      column: $table.personalizedTips,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get futurePredictions => $composableBuilder(
+      column: $table.futurePredictions,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get actionPlan => $composableBuilder(
+      column: $table.actionPlan, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get categoryAnalysis => $composableBuilder(
+      column: $table.categoryAnalysis,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$UserProfileTableOrderingComposer get userId {
+    final $$UserProfileTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.userProfile,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UserProfileTableOrderingComposer(
+              $db: $db,
+              $table: $db.userProfile,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$NutritionAnalysesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NutritionAnalysesTable> {
+  $$NutritionAnalysesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get analysisDate => $composableBuilder(
+      column: $table.analysisDate, builder: (column) => column);
+
+  GeneratedColumn<int> get overallScore => $composableBuilder(
+      column: $table.overallScore, builder: (column) => column);
+
+  GeneratedColumn<String> get overallLevel => $composableBuilder(
+      column: $table.overallLevel, builder: (column) => column);
+
+  GeneratedColumn<String> get overallSummary => $composableBuilder(
+      column: $table.overallSummary, builder: (column) => column);
+
+  GeneratedColumn<String> get personalizedTips => $composableBuilder(
+      column: $table.personalizedTips, builder: (column) => column);
+
+  GeneratedColumn<String> get futurePredictions => $composableBuilder(
+      column: $table.futurePredictions, builder: (column) => column);
+
+  GeneratedColumn<String> get actionPlan => $composableBuilder(
+      column: $table.actionPlan, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryAnalysis => $composableBuilder(
+      column: $table.categoryAnalysis, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$UserProfileTableAnnotationComposer get userId {
+    final $$UserProfileTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.userProfile,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UserProfileTableAnnotationComposer(
+              $db: $db,
+              $table: $db.userProfile,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$NutritionAnalysesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $NutritionAnalysesTable,
+    NutritionAnalysisData,
+    $$NutritionAnalysesTableFilterComposer,
+    $$NutritionAnalysesTableOrderingComposer,
+    $$NutritionAnalysesTableAnnotationComposer,
+    $$NutritionAnalysesTableCreateCompanionBuilder,
+    $$NutritionAnalysesTableUpdateCompanionBuilder,
+    (NutritionAnalysisData, $$NutritionAnalysesTableReferences),
+    NutritionAnalysisData,
+    PrefetchHooks Function({bool userId})> {
+  $$NutritionAnalysesTableTableManager(
+      _$AppDatabase db, $NutritionAnalysesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NutritionAnalysesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NutritionAnalysesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NutritionAnalysesTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> userId = const Value.absent(),
+            Value<DateTime> analysisDate = const Value.absent(),
+            Value<int> overallScore = const Value.absent(),
+            Value<String> overallLevel = const Value.absent(),
+            Value<String> overallSummary = const Value.absent(),
+            Value<String> personalizedTips = const Value.absent(),
+            Value<String> futurePredictions = const Value.absent(),
+            Value<String> actionPlan = const Value.absent(),
+            Value<String> categoryAnalysis = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              NutritionAnalysesCompanion(
+            id: id,
+            userId: userId,
+            analysisDate: analysisDate,
+            overallScore: overallScore,
+            overallLevel: overallLevel,
+            overallSummary: overallSummary,
+            personalizedTips: personalizedTips,
+            futurePredictions: futurePredictions,
+            actionPlan: actionPlan,
+            categoryAnalysis: categoryAnalysis,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int userId,
+            required DateTime analysisDate,
+            required int overallScore,
+            required String overallLevel,
+            required String overallSummary,
+            required String personalizedTips,
+            required String futurePredictions,
+            required String actionPlan,
+            required String categoryAnalysis,
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              NutritionAnalysesCompanion.insert(
+            id: id,
+            userId: userId,
+            analysisDate: analysisDate,
+            overallScore: overallScore,
+            overallLevel: overallLevel,
+            overallSummary: overallSummary,
+            personalizedTips: personalizedTips,
+            futurePredictions: futurePredictions,
+            actionPlan: actionPlan,
+            categoryAnalysis: categoryAnalysis,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$NutritionAnalysesTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (userId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.userId,
+                    referencedTable:
+                        $$NutritionAnalysesTableReferences._userIdTable(db),
+                    referencedColumn:
+                        $$NutritionAnalysesTableReferences._userIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$NutritionAnalysesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $NutritionAnalysesTable,
+    NutritionAnalysisData,
+    $$NutritionAnalysesTableFilterComposer,
+    $$NutritionAnalysesTableOrderingComposer,
+    $$NutritionAnalysesTableAnnotationComposer,
+    $$NutritionAnalysesTableCreateCompanionBuilder,
+    $$NutritionAnalysesTableUpdateCompanionBuilder,
+    (NutritionAnalysisData, $$NutritionAnalysesTableReferences),
+    NutritionAnalysisData,
+    PrefetchHooks Function({bool userId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2617,4 +3648,6 @@ class $AppDatabaseManager {
       $$ReceiptsTableTableManager(_db, _db.receipts);
   $$FoodItemsTableTableManager get foodItems =>
       $$FoodItemsTableTableManager(_db, _db.foodItems);
+  $$NutritionAnalysesTableTableManager get nutritionAnalyses =>
+      $$NutritionAnalysesTableTableManager(_db, _db.nutritionAnalyses);
 }

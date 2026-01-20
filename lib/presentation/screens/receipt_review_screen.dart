@@ -152,6 +152,9 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         );
       }
 
+      // LLM 영양 분석 호출 및 저장 (백그라운드)
+      _fetchAndSaveNutritionAnalysis(user.id, receiptRepo);
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,6 +174,66 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
       setState(() {
         _isProcessing = false;
       });
+    }
+  }
+
+  /// LLM 영양 분석을 호출하고 DB에 저장 (백그라운드 실행)
+  Future<void> _fetchAndSaveNutritionAnalysis(int userId, dynamic receiptRepo) async {
+    try {
+      final userAsync = ref.read(userProvider);
+      final user = userAsync.value;
+      if (user == null) return;
+
+      // 사용자의 전체 영수증 목록 조회
+      final receipts = await receiptRepo.getReceiptsByUser(userId);
+
+      // 구매 이력 데이터 생성
+      final purchaseHistory = <Map<String, dynamic>>[];
+      for (final receipt in receipts) {
+        final foodItems = await receiptRepo.getFoodItemsByReceipt(receipt.id);
+        for (final item in foodItems) {
+          purchaseHistory.add({
+            'name': item.name,
+            'category': item.category,
+            'price': item.price?.toInt() ?? 0,
+            'calories': item.calories,
+            'sodium': item.sodiumMg,
+            'sugar': item.sugarG,
+            'fat': item.fatG,
+            'protein': item.proteinG,
+            'carbs': item.carbsG,
+            'date': receipt.receiptDate.toIso8601String(),
+          });
+        }
+      }
+
+      if (purchaseHistory.isEmpty) return;
+
+      // 사용자 프로필 생성
+      final userProfile = {
+        'age': user.age,
+        'gender': user.gender,
+        'height': user.height,
+        'weight': user.weight,
+      };
+
+      // LLM 영양 조언 호출
+      final llmService = LlmParserService();
+      final advice = await llmService.getNutritionAdvice(
+        userProfile: userProfile,
+        purchaseHistory: purchaseHistory,
+      );
+
+      if (advice != null) {
+        // DB에 저장
+        await receiptRepo.saveNutritionAnalysis(
+          userId: userId,
+          advice: advice,
+        );
+        print('영양 분석 결과 저장 완료');
+      }
+    } catch (e) {
+      print('영양 분석 저장 실패: $e');
     }
   }
 

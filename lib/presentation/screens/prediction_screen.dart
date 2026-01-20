@@ -65,50 +65,20 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
         _localResult = localResult;
       });
 
-      // 2. LLM 영양 조언 요청 (데이터가 있을 경우)
+      // 2. DB에서 캐시된 LLM 영양 조언 확인 (API 호출 없음!)
       if (_allFoodItems.isNotEmpty) {
-        final llmService = LlmParserService();
+        final cachedAdvice = await receiptRepo.getLatestNutritionAnalysis(user.id);
 
-        // 구매 이력 데이터 변환
-        final purchaseHistory = _allFoodItems.map((item) => {
-          'name': item.name,
-          'category': item.category,
-          'price': item.price,
-          'calories': item.calories,
-          'sodiumMg': item.sodiumMg,
-          'sugarG': item.sugarG,
-          'fatG': item.fatG,
-          'proteinG': item.proteinG,
-          'carbsG': item.carbsG,
-        }).toList();
-
-        // 사용자 프로필
-        final userProfile = {
-          'age': user.age,
-          'gender': user.gender,
-          'height': user.height,
-          'weight': user.weight,
-          'bmi': user.weight / ((user.height / 100) * (user.height / 100)),
-        };
-
-        // 현재 분석 데이터
-        final currentAnalysis = {
-          'metabolicScore': localResult.metabolicScore,
-          'riskLevel': localResult.riskLevel,
-          'totalSodiumDailyMg': localResult.totalSodiumDailyMg,
-          'totalCaloriesDaily': localResult.totalCaloriesDaily,
-          'totalSugarDailyG': localResult.totalSugarDailyG,
-        };
-
-        final llmAdvice = await llmService.getNutritionAdvice(
-          userProfile: userProfile,
-          purchaseHistory: purchaseHistory,
-          currentAnalysis: currentAnalysis,
-        );
-
-        setState(() {
-          _llmAdvice = llmAdvice;
-        });
+        if (cachedAdvice != null) {
+          // DB에 저장된 분석 결과 사용 (토큰 절약)
+          print('DB에서 캐시된 영양 분석 결과 로드');
+          setState(() {
+            _llmAdvice = cachedAdvice;
+          });
+        } else {
+          // 캐시 없음 - 신규 사용자 또는 데이터 없음
+          print('캐시된 분석 결과 없음 - 영수증 저장 시 분석됨');
+        }
       }
 
       setState(() {
@@ -141,12 +111,7 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('AI가 건강 데이터를 분석 중...'),
-                  SizedBox(height: 8),
-                  Text(
-                    '맞춤형 영양 조언을 준비하고 있습니다',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
+                  Text('건강 데이터 불러오는 중...'),
                 ],
               ),
             )

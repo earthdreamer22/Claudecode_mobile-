@@ -131,6 +131,17 @@ class NutritionAdviceResult {
       actionPlan: ActionPlan.fromJson(json['actionPlan'] ?? {}),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'overallAssessment': overallAssessment.toJson(),
+      'categoryAnalysis': categoryAnalysis.map((k, v) => MapEntry(k, v.toJson())),
+      'nutritionBalance': nutritionBalance.toJson(),
+      'personalizedTips': personalizedTips,
+      'futurePredictions': futurePredictions.map((k, v) => MapEntry(k, v.toJson())),
+      'actionPlan': actionPlan.toJson(),
+    };
+  }
 }
 
 class OverallAssessment {
@@ -151,6 +162,12 @@ class OverallAssessment {
       summary: json['summary'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'score': score,
+    'level': level,
+    'summary': summary,
+  };
 }
 
 class CategoryAnalysis {
@@ -171,6 +188,12 @@ class CategoryAnalysis {
       advice: json['advice'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'percentage': percentage,
+    'assessment': assessment,
+    'advice': advice,
+  };
 }
 
 class NutritionBalance {
@@ -191,6 +214,12 @@ class NutritionBalance {
       calories: NutritionStatus.fromJson(json['calories'] ?? {}),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'sodium': sodium.toJson(),
+    'sugar': sugar.toJson(),
+    'calories': calories.toJson(),
+  };
 }
 
 class NutritionStatus {
@@ -208,6 +237,11 @@ class NutritionStatus {
       advice: json['advice'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'status': status,
+    'advice': advice,
+  };
 }
 
 class FuturePrediction {
@@ -231,6 +265,13 @@ class FuturePrediction {
       explanation: json['explanation'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'riskLevel': riskLevel,
+    'metabolicScore': metabolicScore,
+    'mainRisks': mainRisks,
+    'explanation': explanation,
+  };
 }
 
 class ActionPlan {
@@ -251,6 +292,12 @@ class ActionPlan {
       longTerm: (json['longTerm'] as List?)?.cast<String>() ?? [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'immediate': immediate,
+    'shortTerm': shortTerm,
+    'longTerm': longTerm,
+  };
 }
 
 /// LLM 파싱 결과

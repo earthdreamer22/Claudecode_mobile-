@@ -7,17 +7,18 @@ import 'dart:io';
 import 'entities/user_profile.dart';
 import 'entities/receipt.dart';
 import 'entities/food_item.dart';
+import 'entities/nutrition_analysis.dart';
 // import 'entities/health_stat.dart'; // 주석 처리 (미구현)
 
 part 'app_database.g.dart';
 
 /// Drift 데이터베이스 클래스
-@DriftDatabase(tables: [UserProfile, Receipts, FoodItems]) // HealthStats 주석 처리 (미구현)
+@DriftDatabase(tables: [UserProfile, Receipts, FoodItems, NutritionAnalyses]) // HealthStats 주석 처리 (미구현)
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -26,7 +27,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // 향후 버전 업그레이드시 마이그레이션 로직 추가
+        // 버전 2: NutritionAnalyses 테이블 추가
+        if (from < 2) {
+          await m.createTable(nutritionAnalyses);
+        }
       },
     );
   }
@@ -119,6 +123,50 @@ class AppDatabase extends _$AppDatabase {
   /// 식료품 삭제
   Future<int> deleteFoodItem(int itemId) async {
     return (delete(foodItems)..where((t) => t.id.equals(itemId))).go();
+  }
+
+  // ========== NutritionAnalyses CRUD ==========
+
+  /// 영양 분석 결과 저장
+  Future<int> createNutritionAnalysis(NutritionAnalysesCompanion analysis) async {
+    return into(nutritionAnalyses).insert(analysis);
+  }
+
+  /// 사용자의 최신 영양 분석 결과 조회
+  Future<NutritionAnalysisData?> getLatestNutritionAnalysis(int userId) async {
+    return (select(nutritionAnalyses)
+          ..where((t) => t.userId.equals(userId))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  /// 사용자의 모든 영양 분석 결과 조회 (최신순)
+  Future<List<NutritionAnalysisData>> getNutritionAnalysesByUser(int userId) async {
+    return (select(nutritionAnalyses)
+          ..where((t) => t.userId.equals(userId))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .get();
+  }
+
+  /// 특정 날짜의 영양 분석 결과 조회
+  Future<NutritionAnalysisData?> getNutritionAnalysisByDate(
+      int userId, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    return (select(nutritionAnalyses)
+          ..where((t) =>
+              t.userId.equals(userId) &
+              t.analysisDate.isBiggerOrEqualValue(startOfDay) &
+              t.analysisDate.isSmallerThanValue(endOfDay))
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
+  /// 영양 분석 결과 삭제
+  Future<int> deleteNutritionAnalysis(int analysisId) async {
+    return (delete(nutritionAnalyses)..where((t) => t.id.equals(analysisId))).go();
   }
 
   // ========== HealthStats CRUD (주석 처리 - 미구현) ==========
