@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/theme.dart';
 import '../../config/constants.dart';
 import '../../utils/food_parser.dart';
+import '../../utils/llm_parser_service.dart';
 import '../providers/database_provider.dart';
 import '../providers/user_provider.dart';
 import 'home_screen.dart';
@@ -41,6 +42,35 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     });
 
     try {
+      // 1차: LLM API로 파싱 시도
+      final llmParser = LlmParserService();
+      final llmResult = await llmParser.parseReceipt(ocrText: widget.ocrText);
+
+      if (llmResult != null && llmResult.items.isNotEmpty) {
+        // LLM 파싱 성공 - LLM 결과를 ParsedFoodItem으로 변환
+        print('LLM 파싱 성공: ${llmResult.items.length}개 항목');
+
+        final parser = FoodParser();
+        final parsedItems = llmResult.items.map((item) => ParsedFoodItem(
+          name: item.name,
+          price: item.price,
+          category: _guessCategory(item.name),
+          rawLine: '${item.name} ${item.price}',
+          lineNumber: 0,
+        )).toList();
+
+        final itemsWithNutrition = await parser.matchWithNutritionDatabase(parsedItems);
+
+        setState(() {
+          _parsedItems = itemsWithNutrition;
+          _isParsed = true;
+          _isProcessing = false;
+        });
+        return;
+      }
+
+      // 2차: LLM 실패 시 기존 로컬 파싱 fallback
+      print('LLM 파싱 실패 - 로컬 파싱으로 fallback');
       final parser = FoodParser();
       final parsedItems = await parser.parseReceiptText(widget.ocrText);
       final itemsWithNutrition =
@@ -52,11 +82,32 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         _isProcessing = false;
       });
     } catch (e) {
+      print('파싱 오류: $e');
       setState(() {
         _isProcessing = false;
       });
       _showError('파싱 실패: $e');
     }
+  }
+
+  String _guessCategory(String name) {
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('우유') || lowerName.contains('치즈') || lowerName.contains('요거트') || lowerName.contains('버터')) {
+      return '유제품';
+    } else if (lowerName.contains('돼지') || lowerName.contains('소고기') || lowerName.contains('닭') || lowerName.contains('삼겹')) {
+      return '육류';
+    } else if (lowerName.contains('사과') || lowerName.contains('바나나') || lowerName.contains('포도') || lowerName.contains('딸기')) {
+      return '과일';
+    } else if (lowerName.contains('양파') || lowerName.contains('당근') || lowerName.contains('배추') || lowerName.contains('시금치')) {
+      return '채소';
+    } else if (lowerName.contains('음료') || lowerName.contains('주스') || lowerName.contains('커피') || lowerName.contains('콜라') || lowerName.contains('물')) {
+      return '음료';
+    } else if (lowerName.contains('쌀') || lowerName.contains('밀가루') || lowerName.contains('빵') || lowerName.contains('면')) {
+      return '곡류';
+    } else if (lowerName.contains('라면') || lowerName.contains('통조림') || lowerName.contains('소시지') || lowerName.contains('햄')) {
+      return '가공식품';
+    }
+    return '기타';
   }
 
   Future<void> _saveReceipt() async {
