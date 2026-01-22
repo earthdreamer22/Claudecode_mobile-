@@ -189,10 +189,17 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         return;
       }
 
+      // 이전 분석 결과에서 캐릭터 이름 가져오기
+      String? previousCharacter;
+      final previousAnalysis = await receiptRepo.getLatestNutritionAnalysis(userId);
+      if (previousAnalysis != null) {
+        previousCharacter = previousAnalysis.dietCharacter.typeName;
+      }
+
       // 사용자의 전체 영수증 목록 조회
       final receipts = await receiptRepo.getReceiptsByUser(userId);
 
-      // 구매 이력 데이터 생성
+      // 구매 이력 데이터 생성 (누적)
       final purchaseHistory = <Map<String, dynamic>>[];
       for (final receipt in receipts) {
         final foodItems = await receiptRepo.getFoodItemsByReceipt(receipt.id);
@@ -205,6 +212,12 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
         }
       }
 
+      // 현재 영수증 항목만 분리 (방금 저장한 영수증)
+      final currentReceiptItems = _parsedItems.map((item) => {
+        'name': item.displayName,
+        'category': item.category,
+      }).toList();
+
       if (purchaseHistory.isNotEmpty) {
         // 사용자 프로필 생성
         final userProfile = {
@@ -214,11 +227,13 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
           'weight': user.weight,
         };
 
-        // LLM 영양 조언 호출
+        // LLM 영양 조언 호출 (현재 영수증 + 이전 캐릭터 포함)
         final llmService = LlmParserService();
         final advice = await llmService.getNutritionAdvice(
           userProfile: userProfile,
           purchaseHistory: purchaseHistory,
+          currentReceiptItems: currentReceiptItems,
+          previousCharacter: previousCharacter,
         );
 
         if (advice != null) {

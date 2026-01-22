@@ -163,6 +163,11 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
           ),
           const SizedBox(height: 16),
 
+          // 0. 추세 비교 (있는 경우)
+          if (advice.trendComparison != null)
+            _buildTrendCard(advice.trendComparison!),
+          if (advice.trendComparison != null) const SizedBox(height: 16),
+
           // 1. 식습관 캐릭터
           _buildCharacterCard(advice.dietCharacter),
           const SizedBox(height: 16),
@@ -181,6 +186,113 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
           if (advice.futureScenarios.isNotEmpty)
             _buildFutureCard(advice.futureScenarios),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTrendCard(TrendComparison trend) {
+    final isImproved = trend.trend == '개선';
+    final isWorsened = trend.trend == '악화';
+
+    final trendColor = isImproved
+        ? Colors.green
+        : isWorsened
+            ? Colors.red
+            : Colors.grey;
+
+    final trendIcon = isImproved
+        ? Icons.trending_up
+        : isWorsened
+            ? Icons.trending_down
+            : Icons.trending_flat;
+
+    final trendText = isImproved
+        ? '개선 중'
+        : isWorsened
+            ? '주의 필요'
+            : '유지 중';
+
+    return Card(
+      elevation: 2,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              trendColor.withOpacity(0.1),
+              trendColor.withOpacity(0.02),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: trendColor.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: trendColor.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(trendIcon, color: trendColor, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        '이전 대비: ',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: trendColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          trendText,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: trendColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    trend.summary,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[800],
+                      height: 1.3,
+                    ),
+                  ),
+                  if (trend.previousCharacter.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '이전: ${trend.previousCharacter}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

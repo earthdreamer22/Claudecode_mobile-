@@ -1,6 +1,6 @@
 name: receipt_health_predictor
 description: 영수증 기반 만성질환 예측 앱
-version: 1.0.0+1
+version: 1.2.1+1
 publish_to: none
 
 environment:

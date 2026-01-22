@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { userProfile, purchaseHistory, analysisContext } = req.body;
+    const { userProfile, purchaseHistory, currentReceiptItems, previousCharacter } = req.body;
 
     if (!purchaseHistory || purchaseHistory.length === 0) {
       return res.status(400).json({ error: 'purchaseHistory is required' });
@@ -60,6 +60,13 @@ export default async function handler(req, res) {
 - 예: "35세 시점: 공복혈당 경계 수준 진입 확률 67%"
 - 예: "40세 시점: 고혈압 약 복용 시작 확률 54%"
 - 현재 패턴이 어떻게 그 결과로 이어지는지 설명
+- **중요**: 이 섹션은 누적된 전체 구매 이력을 기반으로 분석
+
+### 5. 추세 비교 (trendComparison) - 이전 분석이 있는 경우만
+- 이전 캐릭터 유형과 현재 영수증을 비교하여 추세 판단
+- trend: "개선" / "유지" / "악화" 중 하나
+- summary: 왜 그렇게 판단했는지 1문장 설명
+- **중요**: 이 섹션은 현재 영수증 항목만 보고 판단
 
 ## 응답 형식 (JSON만 출력)
 {
@@ -93,15 +100,27 @@ export default async function handler(req, res) {
       "explanation": "현재 패턴이 어떻게 이 결과로 이어지는지",
       "preventionTip": "지금 바꾸면 달라지는 것"
     }
-  ]
+  ],
+  "trendComparison": {
+    "trend": "개선/유지/악화 중 하나",
+    "summary": "판단 근거 1문장",
+    "previousCharacter": "이전 캐릭터 유형명"
+  }
 }
 
 ## 주의사항
-- purchasePatterns: 최소 2개, 최대 4개
+- purchasePatterns: 최소 2개, 최대 4개 (현재 영수증 항목 기준으로 분석)
 - deficiencyWarnings: 해당 없으면 빈 배열, 있으면 최대 3개
-- futureScenarios: 정확히 3개 (5년후, 10년후, 15년후)
+- futureScenarios: 정확히 3개 (5년후, 10년후, 15년후, 누적 데이터 기준)
+- trendComparison: 이전 캐릭터 정보가 있을 때만 포함, 없으면 null
+- dietCharacter: 현재 영수증만 보고 판단 (누적 아님)
 - 모든 텍스트는 한국어
 - 숫자와 구체적 품목명을 적극 활용`;
+
+    // 현재 영수증 항목 텍스트 생성
+    const currentItemsText = currentReceiptItems && currentReceiptItems.length > 0
+      ? currentReceiptItems.map(item => `- ${item.name}${item.category ? ` [${item.category}]` : ''}`).join('\n')
+      : '(현재 영수증 정보 없음)';
 
     const userPrompt = `## 사용자 정보
 ${userProfile ? `- 나이: ${userProfile.age || '미입력'}세
@@ -109,14 +128,22 @@ ${userProfile ? `- 나이: ${userProfile.age || '미입력'}세
 - 키: ${userProfile.height || '미입력'}cm
 - 체중: ${userProfile.weight || '미입력'}kg` : '프로필 정보 없음'}
 
-## 구매 이력 (총 ${purchaseHistory.length}개 품목)
+## 현재 영수증 항목 (이번에 구매한 것, dietCharacter/purchasePatterns 분석 기준)
+${currentItemsText}
+
+## 누적 구매 이력 (총 ${purchaseHistory.length}개 품목, futureScenarios 분석 기준)
 ${purchaseHistory.map(item => `- ${item.name}${item.category ? ` [${item.category}]` : ''}${item.purchaseDate ? ` (${item.purchaseDate})` : ''}`).join('\n')}
 
-## 추가 분석 컨텍스트
-${analysisContext ? JSON.stringify(analysisContext, null, 2) : '없음'}
+## 이전 분석 결과
+${previousCharacter ? `- 이전 캐릭터 유형: ${previousCharacter}` : '(첫 분석 - 추세 비교 불필요)'}
 
-위 데이터를 분석하여, 이 사용자만의 고유한 식습관 패턴을 발견하고 JSON으로 응답해주세요.
-뻔한 건강 상식이 아닌, 데이터에서 발견한 구체적인 인사이트를 제공해주세요.`;
+위 데이터를 분석하여:
+1. dietCharacter, purchasePatterns: **현재 영수증 항목**만 보고 분석
+2. deficiencyWarnings: 현재 + 누적 데이터 종합
+3. futureScenarios: **누적 구매 이력** 전체를 기반으로 분석
+4. trendComparison: 이전 캐릭터가 있으면 현재 영수증이 개선/유지/악화인지 판단
+
+JSON으로 응답해주세요.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

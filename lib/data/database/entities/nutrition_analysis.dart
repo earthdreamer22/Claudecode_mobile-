@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'user_profile.dart';
 
-/// 영양 분석 결과 테이블 (LLM API 응답 캐싱) - v2
+/// 영양 분석 결과 테이블 (LLM API 응답 캐싱) - v3
 @DataClassName('NutritionAnalysisData')
 class NutritionAnalyses extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -21,6 +21,9 @@ class NutritionAnalyses extends Table {
 
   // 미래 건강 시나리오 (JSON array)
   TextColumn get futureScenarios => text()();
+
+  // 추세 비교 (JSON, nullable)
+  TextColumn get trendComparison => text().nullable()();
 
   // 생성 날짜
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

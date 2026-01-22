@@ -142,6 +142,11 @@ class ReceiptRepository {
         futureScenarios: jsonEncode(
           advice.futureScenarios.map((e) => e.toJson()).toList(),
         ),
+        trendComparison: Value(
+          advice.trendComparison != null
+              ? jsonEncode(advice.trendComparison!.toJson())
+              : null,
+        ),
       ),
     );
   }
@@ -178,11 +183,19 @@ class ReceiptRepository {
         .map((e) => FutureHealthScenario.fromJson(e))
         .toList();
 
+    // trendComparison 파싱 (nullable)
+    TrendComparison? trendComparison;
+    if (data.trendComparison != null) {
+      final trendJson = jsonDecode(data.trendComparison!) as Map<String, dynamic>;
+      trendComparison = TrendComparison.fromJson(trendJson);
+    }
+
     return NutritionAdviceResult(
       dietCharacter: dietCharacter,
       purchasePatterns: purchasePatterns,
       deficiencyWarnings: deficiencyWarnings,
       futureScenarios: futureScenarios,
+      trendComparison: trendComparison,
     );
   }
 

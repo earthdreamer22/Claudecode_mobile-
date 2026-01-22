@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -36,6 +36,10 @@ class AppDatabase extends _$AppDatabase {
           // 기존 테이블 삭제 후 재생성 (데이터 손실, 새 분석으로 대체)
           await m.deleteTable('nutrition_analyses');
           await m.createTable(nutritionAnalyses);
+        }
+        // 버전 4: trendComparison 컬럼 추가
+        if (from < 4) {
+          await m.addColumn(nutritionAnalyses, nutritionAnalyses.trendComparison);
         }
       },
     );

@@ -1554,6 +1554,12 @@ class $NutritionAnalysesTable extends NutritionAnalyses
   late final GeneratedColumn<String> futureScenarios = GeneratedColumn<String>(
       'future_scenarios', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _trendComparisonMeta =
+      const VerificationMeta('trendComparison');
+  @override
+  late final GeneratedColumn<String> trendComparison = GeneratedColumn<String>(
+      'trend_comparison', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -1571,6 +1577,7 @@ class $NutritionAnalysesTable extends NutritionAnalyses
         purchasePatterns,
         deficiencyWarnings,
         futureScenarios,
+        trendComparison,
         createdAt
       ];
   @override
@@ -1633,6 +1640,12 @@ class $NutritionAnalysesTable extends NutritionAnalyses
     } else if (isInserting) {
       context.missing(_futureScenariosMeta);
     }
+    if (data.containsKey('trend_comparison')) {
+      context.handle(
+          _trendComparisonMeta,
+          trendComparison.isAcceptableOrUnknown(
+              data['trend_comparison']!, _trendComparisonMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1660,6 +1673,8 @@ class $NutritionAnalysesTable extends NutritionAnalyses
           DriftSqlType.string, data['${effectivePrefix}deficiency_warnings'])!,
       futureScenarios: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}future_scenarios'])!,
+      trendComparison: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}trend_comparison']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -1680,6 +1695,7 @@ class NutritionAnalysisData extends DataClass
   final String purchasePatterns;
   final String deficiencyWarnings;
   final String futureScenarios;
+  final String? trendComparison;
   final DateTime createdAt;
   const NutritionAnalysisData(
       {required this.id,
@@ -1689,6 +1705,7 @@ class NutritionAnalysisData extends DataClass
       required this.purchasePatterns,
       required this.deficiencyWarnings,
       required this.futureScenarios,
+      this.trendComparison,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1700,6 +1717,9 @@ class NutritionAnalysisData extends DataClass
     map['purchase_patterns'] = Variable<String>(purchasePatterns);
     map['deficiency_warnings'] = Variable<String>(deficiencyWarnings);
     map['future_scenarios'] = Variable<String>(futureScenarios);
+    if (!nullToAbsent || trendComparison != null) {
+      map['trend_comparison'] = Variable<String>(trendComparison);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1713,6 +1733,9 @@ class NutritionAnalysisData extends DataClass
       purchasePatterns: Value(purchasePatterns),
       deficiencyWarnings: Value(deficiencyWarnings),
       futureScenarios: Value(futureScenarios),
+      trendComparison: trendComparison == null && nullToAbsent
+          ? const Value.absent()
+          : Value(trendComparison),
       createdAt: Value(createdAt),
     );
   }
@@ -1729,6 +1752,7 @@ class NutritionAnalysisData extends DataClass
       deficiencyWarnings:
           serializer.fromJson<String>(json['deficiencyWarnings']),
       futureScenarios: serializer.fromJson<String>(json['futureScenarios']),
+      trendComparison: serializer.fromJson<String?>(json['trendComparison']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1743,6 +1767,7 @@ class NutritionAnalysisData extends DataClass
       'purchasePatterns': serializer.toJson<String>(purchasePatterns),
       'deficiencyWarnings': serializer.toJson<String>(deficiencyWarnings),
       'futureScenarios': serializer.toJson<String>(futureScenarios),
+      'trendComparison': serializer.toJson<String?>(trendComparison),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1755,6 +1780,7 @@ class NutritionAnalysisData extends DataClass
           String? purchasePatterns,
           String? deficiencyWarnings,
           String? futureScenarios,
+          Value<String?> trendComparison = const Value.absent(),
           DateTime? createdAt}) =>
       NutritionAnalysisData(
         id: id ?? this.id,
@@ -1764,6 +1790,9 @@ class NutritionAnalysisData extends DataClass
         purchasePatterns: purchasePatterns ?? this.purchasePatterns,
         deficiencyWarnings: deficiencyWarnings ?? this.deficiencyWarnings,
         futureScenarios: futureScenarios ?? this.futureScenarios,
+        trendComparison: trendComparison.present
+            ? trendComparison.value
+            : this.trendComparison,
         createdAt: createdAt ?? this.createdAt,
       );
   NutritionAnalysisData copyWithCompanion(NutritionAnalysesCompanion data) {
@@ -1785,6 +1814,9 @@ class NutritionAnalysisData extends DataClass
       futureScenarios: data.futureScenarios.present
           ? data.futureScenarios.value
           : this.futureScenarios,
+      trendComparison: data.trendComparison.present
+          ? data.trendComparison.value
+          : this.trendComparison,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1799,14 +1831,23 @@ class NutritionAnalysisData extends DataClass
           ..write('purchasePatterns: $purchasePatterns, ')
           ..write('deficiencyWarnings: $deficiencyWarnings, ')
           ..write('futureScenarios: $futureScenarios, ')
+          ..write('trendComparison: $trendComparison, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, analysisDate, dietCharacter,
-      purchasePatterns, deficiencyWarnings, futureScenarios, createdAt);
+  int get hashCode => Object.hash(
+      id,
+      userId,
+      analysisDate,
+      dietCharacter,
+      purchasePatterns,
+      deficiencyWarnings,
+      futureScenarios,
+      trendComparison,
+      createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1818,6 +1859,7 @@ class NutritionAnalysisData extends DataClass
           other.purchasePatterns == this.purchasePatterns &&
           other.deficiencyWarnings == this.deficiencyWarnings &&
           other.futureScenarios == this.futureScenarios &&
+          other.trendComparison == this.trendComparison &&
           other.createdAt == this.createdAt);
 }
 
@@ -1830,6 +1872,7 @@ class NutritionAnalysesCompanion
   final Value<String> purchasePatterns;
   final Value<String> deficiencyWarnings;
   final Value<String> futureScenarios;
+  final Value<String?> trendComparison;
   final Value<DateTime> createdAt;
   const NutritionAnalysesCompanion({
     this.id = const Value.absent(),
@@ -1839,6 +1882,7 @@ class NutritionAnalysesCompanion
     this.purchasePatterns = const Value.absent(),
     this.deficiencyWarnings = const Value.absent(),
     this.futureScenarios = const Value.absent(),
+    this.trendComparison = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   NutritionAnalysesCompanion.insert({
@@ -1849,6 +1893,7 @@ class NutritionAnalysesCompanion
     required String purchasePatterns,
     required String deficiencyWarnings,
     required String futureScenarios,
+    this.trendComparison = const Value.absent(),
     this.createdAt = const Value.absent(),
   })  : userId = Value(userId),
         analysisDate = Value(analysisDate),
@@ -1864,6 +1909,7 @@ class NutritionAnalysesCompanion
     Expression<String>? purchasePatterns,
     Expression<String>? deficiencyWarnings,
     Expression<String>? futureScenarios,
+    Expression<String>? trendComparison,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1874,6 +1920,7 @@ class NutritionAnalysesCompanion
       if (purchasePatterns != null) 'purchase_patterns': purchasePatterns,
       if (deficiencyWarnings != null) 'deficiency_warnings': deficiencyWarnings,
       if (futureScenarios != null) 'future_scenarios': futureScenarios,
+      if (trendComparison != null) 'trend_comparison': trendComparison,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1886,6 +1933,7 @@ class NutritionAnalysesCompanion
       Value<String>? purchasePatterns,
       Value<String>? deficiencyWarnings,
       Value<String>? futureScenarios,
+      Value<String?>? trendComparison,
       Value<DateTime>? createdAt}) {
     return NutritionAnalysesCompanion(
       id: id ?? this.id,
@@ -1895,6 +1943,7 @@ class NutritionAnalysesCompanion
       purchasePatterns: purchasePatterns ?? this.purchasePatterns,
       deficiencyWarnings: deficiencyWarnings ?? this.deficiencyWarnings,
       futureScenarios: futureScenarios ?? this.futureScenarios,
+      trendComparison: trendComparison ?? this.trendComparison,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1923,6 +1972,9 @@ class NutritionAnalysesCompanion
     if (futureScenarios.present) {
       map['future_scenarios'] = Variable<String>(futureScenarios.value);
     }
+    if (trendComparison.present) {
+      map['trend_comparison'] = Variable<String>(trendComparison.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1939,6 +1991,7 @@ class NutritionAnalysesCompanion
           ..write('purchasePatterns: $purchasePatterns, ')
           ..write('deficiencyWarnings: $deficiencyWarnings, ')
           ..write('futureScenarios: $futureScenarios, ')
+          ..write('trendComparison: $trendComparison, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3140,6 +3193,7 @@ typedef $$NutritionAnalysesTableCreateCompanionBuilder
   required String purchasePatterns,
   required String deficiencyWarnings,
   required String futureScenarios,
+  Value<String?> trendComparison,
   Value<DateTime> createdAt,
 });
 typedef $$NutritionAnalysesTableUpdateCompanionBuilder
@@ -3151,6 +3205,7 @@ typedef $$NutritionAnalysesTableUpdateCompanionBuilder
   Value<String> purchasePatterns,
   Value<String> deficiencyWarnings,
   Value<String> futureScenarios,
+  Value<String?> trendComparison,
   Value<DateTime> createdAt,
 });
 
@@ -3203,6 +3258,10 @@ class $$NutritionAnalysesTableFilterComposer
 
   ColumnFilters<String> get futureScenarios => $composableBuilder(
       column: $table.futureScenarios,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get trendComparison => $composableBuilder(
+      column: $table.trendComparison,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
@@ -3261,6 +3320,10 @@ class $$NutritionAnalysesTableOrderingComposer
       column: $table.futureScenarios,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get trendComparison => $composableBuilder(
+      column: $table.trendComparison,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -3311,6 +3374,9 @@ class $$NutritionAnalysesTableAnnotationComposer
 
   GeneratedColumn<String> get futureScenarios => $composableBuilder(
       column: $table.futureScenarios, builder: (column) => column);
+
+  GeneratedColumn<String> get trendComparison => $composableBuilder(
+      column: $table.trendComparison, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3368,6 +3434,7 @@ class $$NutritionAnalysesTableTableManager extends RootTableManager<
             Value<String> purchasePatterns = const Value.absent(),
             Value<String> deficiencyWarnings = const Value.absent(),
             Value<String> futureScenarios = const Value.absent(),
+            Value<String?> trendComparison = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               NutritionAnalysesCompanion(
@@ -3378,6 +3445,7 @@ class $$NutritionAnalysesTableTableManager extends RootTableManager<
             purchasePatterns: purchasePatterns,
             deficiencyWarnings: deficiencyWarnings,
             futureScenarios: futureScenarios,
+            trendComparison: trendComparison,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -3388,6 +3456,7 @@ class $$NutritionAnalysesTableTableManager extends RootTableManager<
             required String purchasePatterns,
             required String deficiencyWarnings,
             required String futureScenarios,
+            Value<String?> trendComparison = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               NutritionAnalysesCompanion.insert(
@@ -3398,6 +3467,7 @@ class $$NutritionAnalysesTableTableManager extends RootTableManager<
             purchasePatterns: purchasePatterns,
             deficiencyWarnings: deficiencyWarnings,
             futureScenarios: futureScenarios,
+            trendComparison: trendComparison,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

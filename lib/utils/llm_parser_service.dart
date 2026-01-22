@@ -51,7 +51,8 @@ class LlmParserService {
   Future<NutritionAdviceResult?> getNutritionAdvice({
     Map<String, dynamic>? userProfile,
     required List<Map<String, dynamic>> purchaseHistory,
-    Map<String, dynamic>? currentAnalysis,
+    List<Map<String, dynamic>>? currentReceiptItems,
+    String? previousCharacter,
   }) async {
     try {
       _logger.i('영양 조언 요청 시작');
@@ -64,7 +65,8 @@ class LlmParserService {
         body: jsonEncode({
           'userProfile': userProfile,
           'purchaseHistory': purchaseHistory,
-          'currentAnalysis': currentAnalysis,
+          'currentReceiptItems': currentReceiptItems,
+          'previousCharacter': previousCharacter,
         }),
       ).timeout(const Duration(seconds: 60));
 
@@ -87,18 +89,47 @@ class LlmParserService {
   }
 }
 
-/// 영양 조언 결과 (v2 - 창의적 분석)
+/// 추세 비교 결과
+class TrendComparison {
+  final String trend; // "개선" / "유지" / "악화"
+  final String summary;
+  final String previousCharacter;
+
+  TrendComparison({
+    required this.trend,
+    required this.summary,
+    required this.previousCharacter,
+  });
+
+  factory TrendComparison.fromJson(Map<String, dynamic> json) {
+    return TrendComparison(
+      trend: json['trend'] as String? ?? '유지',
+      summary: json['summary'] as String? ?? '',
+      previousCharacter: json['previousCharacter'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'trend': trend,
+    'summary': summary,
+    'previousCharacter': previousCharacter,
+  };
+}
+
+/// 영양 조언 결과 (v3 - 창의적 분석 + 추세 비교)
 class NutritionAdviceResult {
   final DietCharacter dietCharacter;
   final List<PurchasePatternInsight> purchasePatterns;
   final List<DeficiencyWarning> deficiencyWarnings;
   final List<FutureHealthScenario> futureScenarios;
+  final TrendComparison? trendComparison;
 
   NutritionAdviceResult({
     required this.dietCharacter,
     required this.purchasePatterns,
     required this.deficiencyWarnings,
     required this.futureScenarios,
+    this.trendComparison,
   });
 
   factory NutritionAdviceResult.fromJson(Map<String, dynamic> json) {
@@ -113,6 +144,9 @@ class NutritionAdviceResult {
       futureScenarios: (json['futureScenarios'] as List?)
           ?.map((e) => FutureHealthScenario.fromJson(e))
           .toList() ?? [],
+      trendComparison: json['trendComparison'] != null
+          ? TrendComparison.fromJson(json['trendComparison'])
+          : null,
     );
   }
 
@@ -122,6 +156,7 @@ class NutritionAdviceResult {
       'purchasePatterns': purchasePatterns.map((e) => e.toJson()).toList(),
       'deficiencyWarnings': deficiencyWarnings.map((e) => e.toJson()).toList(),
       'futureScenarios': futureScenarios.map((e) => e.toJson()).toList(),
+      if (trendComparison != null) 'trendComparison': trendComparison!.toJson(),
     };
   }
 }
