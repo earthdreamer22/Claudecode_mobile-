@@ -280,8 +280,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    final assessment = _cachedAdvice!.overallAssessment;
-    final levelColor = _getLevelColor(assessment.level);
+    final character = _cachedAdvice!.dietCharacter;
 
     return Card(
       elevation: 4,
@@ -299,8 +298,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.blue.withOpacity(0.1),
-                Colors.purple.withOpacity(0.05),
+                Colors.purple.withOpacity(0.1),
+                Colors.blue.withOpacity(0.05),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -314,53 +313,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: Colors.purple.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.psychology, color: Colors.blue, size: 24),
+                    child: Text(character.emoji, style: const TextStyle(fontSize: 24)),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'AI 종합 평가',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '나의 식습관 유형',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        Text(
+                          character.typeName,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Spacer(),
                   Icon(Icons.chevron_right, color: Colors.grey[400]),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        '${assessment.score}',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: levelColor,
-                        ),
-                      ),
-                      const Text('건강 점수', style: TextStyle(color: Colors.grey)),
-                    ],
+              const SizedBox(height: 12),
+              // 특성 태그들
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: character.traits.take(3).map((trait) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: levelColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      assessment.level,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: levelColor,
-                      ),
-                    ),
+                  child: Text(
+                    trait,
+                    style: TextStyle(fontSize: 12, color: Colors.purple[700]),
                   ),
-                ],
+                )).toList(),
               ),
               const SizedBox(height: 12),
               Container(
@@ -370,10 +364,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  assessment.summary,
+                  character.riskSummary,
                   style: const TextStyle(fontSize: 13, height: 1.4),
                   textAlign: TextAlign.center,
-                  maxLines: 3,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -387,20 +381,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Color _getLevelColor(String level) {
-    switch (level) {
-      case '양호':
-        return Colors.green;
-      case '주의':
-        return Colors.orange;
-      case '경고':
-        return Colors.deepOrange;
-      case '위험':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

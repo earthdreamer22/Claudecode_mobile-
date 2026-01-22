@@ -1530,47 +1530,29 @@ class $NutritionAnalysesTable extends NutritionAnalyses
   late final GeneratedColumn<DateTime> analysisDate = GeneratedColumn<DateTime>(
       'analysis_date', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  static const VerificationMeta _overallScoreMeta =
-      const VerificationMeta('overallScore');
+  static const VerificationMeta _dietCharacterMeta =
+      const VerificationMeta('dietCharacter');
   @override
-  late final GeneratedColumn<int> overallScore = GeneratedColumn<int>(
-      'overall_score', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _overallLevelMeta =
-      const VerificationMeta('overallLevel');
-  @override
-  late final GeneratedColumn<String> overallLevel = GeneratedColumn<String>(
-      'overall_level', aliasedName, false,
+  late final GeneratedColumn<String> dietCharacter = GeneratedColumn<String>(
+      'diet_character', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _overallSummaryMeta =
-      const VerificationMeta('overallSummary');
+  static const VerificationMeta _purchasePatternsMeta =
+      const VerificationMeta('purchasePatterns');
   @override
-  late final GeneratedColumn<String> overallSummary = GeneratedColumn<String>(
-      'overall_summary', aliasedName, false,
+  late final GeneratedColumn<String> purchasePatterns = GeneratedColumn<String>(
+      'purchase_patterns', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _personalizedTipsMeta =
-      const VerificationMeta('personalizedTips');
+  static const VerificationMeta _deficiencyWarningsMeta =
+      const VerificationMeta('deficiencyWarnings');
   @override
-  late final GeneratedColumn<String> personalizedTips = GeneratedColumn<String>(
-      'personalized_tips', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _futurePredictionsMeta =
-      const VerificationMeta('futurePredictions');
-  @override
-  late final GeneratedColumn<String> futurePredictions =
-      GeneratedColumn<String>('future_predictions', aliasedName, false,
+  late final GeneratedColumn<String> deficiencyWarnings =
+      GeneratedColumn<String>('deficiency_warnings', aliasedName, false,
           type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _actionPlanMeta =
-      const VerificationMeta('actionPlan');
+  static const VerificationMeta _futureScenariosMeta =
+      const VerificationMeta('futureScenarios');
   @override
-  late final GeneratedColumn<String> actionPlan = GeneratedColumn<String>(
-      'action_plan', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _categoryAnalysisMeta =
-      const VerificationMeta('categoryAnalysis');
-  @override
-  late final GeneratedColumn<String> categoryAnalysis = GeneratedColumn<String>(
-      'category_analysis', aliasedName, false,
+  late final GeneratedColumn<String> futureScenarios = GeneratedColumn<String>(
+      'future_scenarios', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
@@ -1585,13 +1567,10 @@ class $NutritionAnalysesTable extends NutritionAnalyses
         id,
         userId,
         analysisDate,
-        overallScore,
-        overallLevel,
-        overallSummary,
-        personalizedTips,
-        futurePredictions,
-        actionPlan,
-        categoryAnalysis,
+        dietCharacter,
+        purchasePatterns,
+        deficiencyWarnings,
+        futureScenarios,
         createdAt
       ];
   @override
@@ -1622,61 +1601,37 @@ class $NutritionAnalysesTable extends NutritionAnalyses
     } else if (isInserting) {
       context.missing(_analysisDateMeta);
     }
-    if (data.containsKey('overall_score')) {
+    if (data.containsKey('diet_character')) {
       context.handle(
-          _overallScoreMeta,
-          overallScore.isAcceptableOrUnknown(
-              data['overall_score']!, _overallScoreMeta));
+          _dietCharacterMeta,
+          dietCharacter.isAcceptableOrUnknown(
+              data['diet_character']!, _dietCharacterMeta));
     } else if (isInserting) {
-      context.missing(_overallScoreMeta);
+      context.missing(_dietCharacterMeta);
     }
-    if (data.containsKey('overall_level')) {
+    if (data.containsKey('purchase_patterns')) {
       context.handle(
-          _overallLevelMeta,
-          overallLevel.isAcceptableOrUnknown(
-              data['overall_level']!, _overallLevelMeta));
+          _purchasePatternsMeta,
+          purchasePatterns.isAcceptableOrUnknown(
+              data['purchase_patterns']!, _purchasePatternsMeta));
     } else if (isInserting) {
-      context.missing(_overallLevelMeta);
+      context.missing(_purchasePatternsMeta);
     }
-    if (data.containsKey('overall_summary')) {
+    if (data.containsKey('deficiency_warnings')) {
       context.handle(
-          _overallSummaryMeta,
-          overallSummary.isAcceptableOrUnknown(
-              data['overall_summary']!, _overallSummaryMeta));
+          _deficiencyWarningsMeta,
+          deficiencyWarnings.isAcceptableOrUnknown(
+              data['deficiency_warnings']!, _deficiencyWarningsMeta));
     } else if (isInserting) {
-      context.missing(_overallSummaryMeta);
+      context.missing(_deficiencyWarningsMeta);
     }
-    if (data.containsKey('personalized_tips')) {
+    if (data.containsKey('future_scenarios')) {
       context.handle(
-          _personalizedTipsMeta,
-          personalizedTips.isAcceptableOrUnknown(
-              data['personalized_tips']!, _personalizedTipsMeta));
+          _futureScenariosMeta,
+          futureScenarios.isAcceptableOrUnknown(
+              data['future_scenarios']!, _futureScenariosMeta));
     } else if (isInserting) {
-      context.missing(_personalizedTipsMeta);
-    }
-    if (data.containsKey('future_predictions')) {
-      context.handle(
-          _futurePredictionsMeta,
-          futurePredictions.isAcceptableOrUnknown(
-              data['future_predictions']!, _futurePredictionsMeta));
-    } else if (isInserting) {
-      context.missing(_futurePredictionsMeta);
-    }
-    if (data.containsKey('action_plan')) {
-      context.handle(
-          _actionPlanMeta,
-          actionPlan.isAcceptableOrUnknown(
-              data['action_plan']!, _actionPlanMeta));
-    } else if (isInserting) {
-      context.missing(_actionPlanMeta);
-    }
-    if (data.containsKey('category_analysis')) {
-      context.handle(
-          _categoryAnalysisMeta,
-          categoryAnalysis.isAcceptableOrUnknown(
-              data['category_analysis']!, _categoryAnalysisMeta));
-    } else if (isInserting) {
-      context.missing(_categoryAnalysisMeta);
+      context.missing(_futureScenariosMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -1697,20 +1652,14 @@ class $NutritionAnalysesTable extends NutritionAnalyses
           .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
       analysisDate: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}analysis_date'])!,
-      overallScore: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}overall_score'])!,
-      overallLevel: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}overall_level'])!,
-      overallSummary: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}overall_summary'])!,
-      personalizedTips: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}personalized_tips'])!,
-      futurePredictions: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}future_predictions'])!,
-      actionPlan: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}action_plan'])!,
-      categoryAnalysis: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}category_analysis'])!,
+      dietCharacter: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}diet_character'])!,
+      purchasePatterns: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}purchase_patterns'])!,
+      deficiencyWarnings: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}deficiency_warnings'])!,
+      futureScenarios: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}future_scenarios'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -1727,25 +1676,19 @@ class NutritionAnalysisData extends DataClass
   final int id;
   final int userId;
   final DateTime analysisDate;
-  final int overallScore;
-  final String overallLevel;
-  final String overallSummary;
-  final String personalizedTips;
-  final String futurePredictions;
-  final String actionPlan;
-  final String categoryAnalysis;
+  final String dietCharacter;
+  final String purchasePatterns;
+  final String deficiencyWarnings;
+  final String futureScenarios;
   final DateTime createdAt;
   const NutritionAnalysisData(
       {required this.id,
       required this.userId,
       required this.analysisDate,
-      required this.overallScore,
-      required this.overallLevel,
-      required this.overallSummary,
-      required this.personalizedTips,
-      required this.futurePredictions,
-      required this.actionPlan,
-      required this.categoryAnalysis,
+      required this.dietCharacter,
+      required this.purchasePatterns,
+      required this.deficiencyWarnings,
+      required this.futureScenarios,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1753,13 +1696,10 @@ class NutritionAnalysisData extends DataClass
     map['id'] = Variable<int>(id);
     map['user_id'] = Variable<int>(userId);
     map['analysis_date'] = Variable<DateTime>(analysisDate);
-    map['overall_score'] = Variable<int>(overallScore);
-    map['overall_level'] = Variable<String>(overallLevel);
-    map['overall_summary'] = Variable<String>(overallSummary);
-    map['personalized_tips'] = Variable<String>(personalizedTips);
-    map['future_predictions'] = Variable<String>(futurePredictions);
-    map['action_plan'] = Variable<String>(actionPlan);
-    map['category_analysis'] = Variable<String>(categoryAnalysis);
+    map['diet_character'] = Variable<String>(dietCharacter);
+    map['purchase_patterns'] = Variable<String>(purchasePatterns);
+    map['deficiency_warnings'] = Variable<String>(deficiencyWarnings);
+    map['future_scenarios'] = Variable<String>(futureScenarios);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1769,13 +1709,10 @@ class NutritionAnalysisData extends DataClass
       id: Value(id),
       userId: Value(userId),
       analysisDate: Value(analysisDate),
-      overallScore: Value(overallScore),
-      overallLevel: Value(overallLevel),
-      overallSummary: Value(overallSummary),
-      personalizedTips: Value(personalizedTips),
-      futurePredictions: Value(futurePredictions),
-      actionPlan: Value(actionPlan),
-      categoryAnalysis: Value(categoryAnalysis),
+      dietCharacter: Value(dietCharacter),
+      purchasePatterns: Value(purchasePatterns),
+      deficiencyWarnings: Value(deficiencyWarnings),
+      futureScenarios: Value(futureScenarios),
       createdAt: Value(createdAt),
     );
   }
@@ -1787,13 +1724,11 @@ class NutritionAnalysisData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<int>(json['userId']),
       analysisDate: serializer.fromJson<DateTime>(json['analysisDate']),
-      overallScore: serializer.fromJson<int>(json['overallScore']),
-      overallLevel: serializer.fromJson<String>(json['overallLevel']),
-      overallSummary: serializer.fromJson<String>(json['overallSummary']),
-      personalizedTips: serializer.fromJson<String>(json['personalizedTips']),
-      futurePredictions: serializer.fromJson<String>(json['futurePredictions']),
-      actionPlan: serializer.fromJson<String>(json['actionPlan']),
-      categoryAnalysis: serializer.fromJson<String>(json['categoryAnalysis']),
+      dietCharacter: serializer.fromJson<String>(json['dietCharacter']),
+      purchasePatterns: serializer.fromJson<String>(json['purchasePatterns']),
+      deficiencyWarnings:
+          serializer.fromJson<String>(json['deficiencyWarnings']),
+      futureScenarios: serializer.fromJson<String>(json['futureScenarios']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1804,13 +1739,10 @@ class NutritionAnalysisData extends DataClass
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<int>(userId),
       'analysisDate': serializer.toJson<DateTime>(analysisDate),
-      'overallScore': serializer.toJson<int>(overallScore),
-      'overallLevel': serializer.toJson<String>(overallLevel),
-      'overallSummary': serializer.toJson<String>(overallSummary),
-      'personalizedTips': serializer.toJson<String>(personalizedTips),
-      'futurePredictions': serializer.toJson<String>(futurePredictions),
-      'actionPlan': serializer.toJson<String>(actionPlan),
-      'categoryAnalysis': serializer.toJson<String>(categoryAnalysis),
+      'dietCharacter': serializer.toJson<String>(dietCharacter),
+      'purchasePatterns': serializer.toJson<String>(purchasePatterns),
+      'deficiencyWarnings': serializer.toJson<String>(deficiencyWarnings),
+      'futureScenarios': serializer.toJson<String>(futureScenarios),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1819,25 +1751,19 @@ class NutritionAnalysisData extends DataClass
           {int? id,
           int? userId,
           DateTime? analysisDate,
-          int? overallScore,
-          String? overallLevel,
-          String? overallSummary,
-          String? personalizedTips,
-          String? futurePredictions,
-          String? actionPlan,
-          String? categoryAnalysis,
+          String? dietCharacter,
+          String? purchasePatterns,
+          String? deficiencyWarnings,
+          String? futureScenarios,
           DateTime? createdAt}) =>
       NutritionAnalysisData(
         id: id ?? this.id,
         userId: userId ?? this.userId,
         analysisDate: analysisDate ?? this.analysisDate,
-        overallScore: overallScore ?? this.overallScore,
-        overallLevel: overallLevel ?? this.overallLevel,
-        overallSummary: overallSummary ?? this.overallSummary,
-        personalizedTips: personalizedTips ?? this.personalizedTips,
-        futurePredictions: futurePredictions ?? this.futurePredictions,
-        actionPlan: actionPlan ?? this.actionPlan,
-        categoryAnalysis: categoryAnalysis ?? this.categoryAnalysis,
+        dietCharacter: dietCharacter ?? this.dietCharacter,
+        purchasePatterns: purchasePatterns ?? this.purchasePatterns,
+        deficiencyWarnings: deficiencyWarnings ?? this.deficiencyWarnings,
+        futureScenarios: futureScenarios ?? this.futureScenarios,
         createdAt: createdAt ?? this.createdAt,
       );
   NutritionAnalysisData copyWithCompanion(NutritionAnalysesCompanion data) {
@@ -1847,26 +1773,18 @@ class NutritionAnalysisData extends DataClass
       analysisDate: data.analysisDate.present
           ? data.analysisDate.value
           : this.analysisDate,
-      overallScore: data.overallScore.present
-          ? data.overallScore.value
-          : this.overallScore,
-      overallLevel: data.overallLevel.present
-          ? data.overallLevel.value
-          : this.overallLevel,
-      overallSummary: data.overallSummary.present
-          ? data.overallSummary.value
-          : this.overallSummary,
-      personalizedTips: data.personalizedTips.present
-          ? data.personalizedTips.value
-          : this.personalizedTips,
-      futurePredictions: data.futurePredictions.present
-          ? data.futurePredictions.value
-          : this.futurePredictions,
-      actionPlan:
-          data.actionPlan.present ? data.actionPlan.value : this.actionPlan,
-      categoryAnalysis: data.categoryAnalysis.present
-          ? data.categoryAnalysis.value
-          : this.categoryAnalysis,
+      dietCharacter: data.dietCharacter.present
+          ? data.dietCharacter.value
+          : this.dietCharacter,
+      purchasePatterns: data.purchasePatterns.present
+          ? data.purchasePatterns.value
+          : this.purchasePatterns,
+      deficiencyWarnings: data.deficiencyWarnings.present
+          ? data.deficiencyWarnings.value
+          : this.deficiencyWarnings,
+      futureScenarios: data.futureScenarios.present
+          ? data.futureScenarios.value
+          : this.futureScenarios,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1877,31 +1795,18 @@ class NutritionAnalysisData extends DataClass
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('analysisDate: $analysisDate, ')
-          ..write('overallScore: $overallScore, ')
-          ..write('overallLevel: $overallLevel, ')
-          ..write('overallSummary: $overallSummary, ')
-          ..write('personalizedTips: $personalizedTips, ')
-          ..write('futurePredictions: $futurePredictions, ')
-          ..write('actionPlan: $actionPlan, ')
-          ..write('categoryAnalysis: $categoryAnalysis, ')
+          ..write('dietCharacter: $dietCharacter, ')
+          ..write('purchasePatterns: $purchasePatterns, ')
+          ..write('deficiencyWarnings: $deficiencyWarnings, ')
+          ..write('futureScenarios: $futureScenarios, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id,
-      userId,
-      analysisDate,
-      overallScore,
-      overallLevel,
-      overallSummary,
-      personalizedTips,
-      futurePredictions,
-      actionPlan,
-      categoryAnalysis,
-      createdAt);
+  int get hashCode => Object.hash(id, userId, analysisDate, dietCharacter,
+      purchasePatterns, deficiencyWarnings, futureScenarios, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1909,13 +1814,10 @@ class NutritionAnalysisData extends DataClass
           other.id == this.id &&
           other.userId == this.userId &&
           other.analysisDate == this.analysisDate &&
-          other.overallScore == this.overallScore &&
-          other.overallLevel == this.overallLevel &&
-          other.overallSummary == this.overallSummary &&
-          other.personalizedTips == this.personalizedTips &&
-          other.futurePredictions == this.futurePredictions &&
-          other.actionPlan == this.actionPlan &&
-          other.categoryAnalysis == this.categoryAnalysis &&
+          other.dietCharacter == this.dietCharacter &&
+          other.purchasePatterns == this.purchasePatterns &&
+          other.deficiencyWarnings == this.deficiencyWarnings &&
+          other.futureScenarios == this.futureScenarios &&
           other.createdAt == this.createdAt);
 }
 
@@ -1924,72 +1826,54 @@ class NutritionAnalysesCompanion
   final Value<int> id;
   final Value<int> userId;
   final Value<DateTime> analysisDate;
-  final Value<int> overallScore;
-  final Value<String> overallLevel;
-  final Value<String> overallSummary;
-  final Value<String> personalizedTips;
-  final Value<String> futurePredictions;
-  final Value<String> actionPlan;
-  final Value<String> categoryAnalysis;
+  final Value<String> dietCharacter;
+  final Value<String> purchasePatterns;
+  final Value<String> deficiencyWarnings;
+  final Value<String> futureScenarios;
   final Value<DateTime> createdAt;
   const NutritionAnalysesCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.analysisDate = const Value.absent(),
-    this.overallScore = const Value.absent(),
-    this.overallLevel = const Value.absent(),
-    this.overallSummary = const Value.absent(),
-    this.personalizedTips = const Value.absent(),
-    this.futurePredictions = const Value.absent(),
-    this.actionPlan = const Value.absent(),
-    this.categoryAnalysis = const Value.absent(),
+    this.dietCharacter = const Value.absent(),
+    this.purchasePatterns = const Value.absent(),
+    this.deficiencyWarnings = const Value.absent(),
+    this.futureScenarios = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   NutritionAnalysesCompanion.insert({
     this.id = const Value.absent(),
     required int userId,
     required DateTime analysisDate,
-    required int overallScore,
-    required String overallLevel,
-    required String overallSummary,
-    required String personalizedTips,
-    required String futurePredictions,
-    required String actionPlan,
-    required String categoryAnalysis,
+    required String dietCharacter,
+    required String purchasePatterns,
+    required String deficiencyWarnings,
+    required String futureScenarios,
     this.createdAt = const Value.absent(),
   })  : userId = Value(userId),
         analysisDate = Value(analysisDate),
-        overallScore = Value(overallScore),
-        overallLevel = Value(overallLevel),
-        overallSummary = Value(overallSummary),
-        personalizedTips = Value(personalizedTips),
-        futurePredictions = Value(futurePredictions),
-        actionPlan = Value(actionPlan),
-        categoryAnalysis = Value(categoryAnalysis);
+        dietCharacter = Value(dietCharacter),
+        purchasePatterns = Value(purchasePatterns),
+        deficiencyWarnings = Value(deficiencyWarnings),
+        futureScenarios = Value(futureScenarios);
   static Insertable<NutritionAnalysisData> custom({
     Expression<int>? id,
     Expression<int>? userId,
     Expression<DateTime>? analysisDate,
-    Expression<int>? overallScore,
-    Expression<String>? overallLevel,
-    Expression<String>? overallSummary,
-    Expression<String>? personalizedTips,
-    Expression<String>? futurePredictions,
-    Expression<String>? actionPlan,
-    Expression<String>? categoryAnalysis,
+    Expression<String>? dietCharacter,
+    Expression<String>? purchasePatterns,
+    Expression<String>? deficiencyWarnings,
+    Expression<String>? futureScenarios,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (analysisDate != null) 'analysis_date': analysisDate,
-      if (overallScore != null) 'overall_score': overallScore,
-      if (overallLevel != null) 'overall_level': overallLevel,
-      if (overallSummary != null) 'overall_summary': overallSummary,
-      if (personalizedTips != null) 'personalized_tips': personalizedTips,
-      if (futurePredictions != null) 'future_predictions': futurePredictions,
-      if (actionPlan != null) 'action_plan': actionPlan,
-      if (categoryAnalysis != null) 'category_analysis': categoryAnalysis,
+      if (dietCharacter != null) 'diet_character': dietCharacter,
+      if (purchasePatterns != null) 'purchase_patterns': purchasePatterns,
+      if (deficiencyWarnings != null) 'deficiency_warnings': deficiencyWarnings,
+      if (futureScenarios != null) 'future_scenarios': futureScenarios,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1998,25 +1882,19 @@ class NutritionAnalysesCompanion
       {Value<int>? id,
       Value<int>? userId,
       Value<DateTime>? analysisDate,
-      Value<int>? overallScore,
-      Value<String>? overallLevel,
-      Value<String>? overallSummary,
-      Value<String>? personalizedTips,
-      Value<String>? futurePredictions,
-      Value<String>? actionPlan,
-      Value<String>? categoryAnalysis,
+      Value<String>? dietCharacter,
+      Value<String>? purchasePatterns,
+      Value<String>? deficiencyWarnings,
+      Value<String>? futureScenarios,
       Value<DateTime>? createdAt}) {
     return NutritionAnalysesCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       analysisDate: analysisDate ?? this.analysisDate,
-      overallScore: overallScore ?? this.overallScore,
-      overallLevel: overallLevel ?? this.overallLevel,
-      overallSummary: overallSummary ?? this.overallSummary,
-      personalizedTips: personalizedTips ?? this.personalizedTips,
-      futurePredictions: futurePredictions ?? this.futurePredictions,
-      actionPlan: actionPlan ?? this.actionPlan,
-      categoryAnalysis: categoryAnalysis ?? this.categoryAnalysis,
+      dietCharacter: dietCharacter ?? this.dietCharacter,
+      purchasePatterns: purchasePatterns ?? this.purchasePatterns,
+      deficiencyWarnings: deficiencyWarnings ?? this.deficiencyWarnings,
+      futureScenarios: futureScenarios ?? this.futureScenarios,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -2033,26 +1911,17 @@ class NutritionAnalysesCompanion
     if (analysisDate.present) {
       map['analysis_date'] = Variable<DateTime>(analysisDate.value);
     }
-    if (overallScore.present) {
-      map['overall_score'] = Variable<int>(overallScore.value);
+    if (dietCharacter.present) {
+      map['diet_character'] = Variable<String>(dietCharacter.value);
     }
-    if (overallLevel.present) {
-      map['overall_level'] = Variable<String>(overallLevel.value);
+    if (purchasePatterns.present) {
+      map['purchase_patterns'] = Variable<String>(purchasePatterns.value);
     }
-    if (overallSummary.present) {
-      map['overall_summary'] = Variable<String>(overallSummary.value);
+    if (deficiencyWarnings.present) {
+      map['deficiency_warnings'] = Variable<String>(deficiencyWarnings.value);
     }
-    if (personalizedTips.present) {
-      map['personalized_tips'] = Variable<String>(personalizedTips.value);
-    }
-    if (futurePredictions.present) {
-      map['future_predictions'] = Variable<String>(futurePredictions.value);
-    }
-    if (actionPlan.present) {
-      map['action_plan'] = Variable<String>(actionPlan.value);
-    }
-    if (categoryAnalysis.present) {
-      map['category_analysis'] = Variable<String>(categoryAnalysis.value);
+    if (futureScenarios.present) {
+      map['future_scenarios'] = Variable<String>(futureScenarios.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2066,13 +1935,10 @@ class NutritionAnalysesCompanion
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('analysisDate: $analysisDate, ')
-          ..write('overallScore: $overallScore, ')
-          ..write('overallLevel: $overallLevel, ')
-          ..write('overallSummary: $overallSummary, ')
-          ..write('personalizedTips: $personalizedTips, ')
-          ..write('futurePredictions: $futurePredictions, ')
-          ..write('actionPlan: $actionPlan, ')
-          ..write('categoryAnalysis: $categoryAnalysis, ')
+          ..write('dietCharacter: $dietCharacter, ')
+          ..write('purchasePatterns: $purchasePatterns, ')
+          ..write('deficiencyWarnings: $deficiencyWarnings, ')
+          ..write('futureScenarios: $futureScenarios, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3270,13 +3136,10 @@ typedef $$NutritionAnalysesTableCreateCompanionBuilder
   Value<int> id,
   required int userId,
   required DateTime analysisDate,
-  required int overallScore,
-  required String overallLevel,
-  required String overallSummary,
-  required String personalizedTips,
-  required String futurePredictions,
-  required String actionPlan,
-  required String categoryAnalysis,
+  required String dietCharacter,
+  required String purchasePatterns,
+  required String deficiencyWarnings,
+  required String futureScenarios,
   Value<DateTime> createdAt,
 });
 typedef $$NutritionAnalysesTableUpdateCompanionBuilder
@@ -3284,13 +3147,10 @@ typedef $$NutritionAnalysesTableUpdateCompanionBuilder
   Value<int> id,
   Value<int> userId,
   Value<DateTime> analysisDate,
-  Value<int> overallScore,
-  Value<String> overallLevel,
-  Value<String> overallSummary,
-  Value<String> personalizedTips,
-  Value<String> futurePredictions,
-  Value<String> actionPlan,
-  Value<String> categoryAnalysis,
+  Value<String> dietCharacter,
+  Value<String> purchasePatterns,
+  Value<String> deficiencyWarnings,
+  Value<String> futureScenarios,
   Value<DateTime> createdAt,
 });
 
@@ -3330,29 +3190,19 @@ class $$NutritionAnalysesTableFilterComposer
   ColumnFilters<DateTime> get analysisDate => $composableBuilder(
       column: $table.analysisDate, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<int> get overallScore => $composableBuilder(
-      column: $table.overallScore, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get dietCharacter => $composableBuilder(
+      column: $table.dietCharacter, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get overallLevel => $composableBuilder(
-      column: $table.overallLevel, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get overallSummary => $composableBuilder(
-      column: $table.overallSummary,
+  ColumnFilters<String> get purchasePatterns => $composableBuilder(
+      column: $table.purchasePatterns,
       builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get personalizedTips => $composableBuilder(
-      column: $table.personalizedTips,
+  ColumnFilters<String> get deficiencyWarnings => $composableBuilder(
+      column: $table.deficiencyWarnings,
       builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get futurePredictions => $composableBuilder(
-      column: $table.futurePredictions,
-      builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get actionPlan => $composableBuilder(
-      column: $table.actionPlan, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get categoryAnalysis => $composableBuilder(
-      column: $table.categoryAnalysis,
+  ColumnFilters<String> get futureScenarios => $composableBuilder(
+      column: $table.futureScenarios,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
@@ -3395,31 +3245,20 @@ class $$NutritionAnalysesTableOrderingComposer
       column: $table.analysisDate,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get overallScore => $composableBuilder(
-      column: $table.overallScore,
+  ColumnOrderings<String> get dietCharacter => $composableBuilder(
+      column: $table.dietCharacter,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get overallLevel => $composableBuilder(
-      column: $table.overallLevel,
+  ColumnOrderings<String> get purchasePatterns => $composableBuilder(
+      column: $table.purchasePatterns,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get overallSummary => $composableBuilder(
-      column: $table.overallSummary,
+  ColumnOrderings<String> get deficiencyWarnings => $composableBuilder(
+      column: $table.deficiencyWarnings,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get personalizedTips => $composableBuilder(
-      column: $table.personalizedTips,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get futurePredictions => $composableBuilder(
-      column: $table.futurePredictions,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get actionPlan => $composableBuilder(
-      column: $table.actionPlan, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get categoryAnalysis => $composableBuilder(
-      column: $table.categoryAnalysis,
+  ColumnOrderings<String> get futureScenarios => $composableBuilder(
+      column: $table.futureScenarios,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
@@ -3461,26 +3300,17 @@ class $$NutritionAnalysesTableAnnotationComposer
   GeneratedColumn<DateTime> get analysisDate => $composableBuilder(
       column: $table.analysisDate, builder: (column) => column);
 
-  GeneratedColumn<int> get overallScore => $composableBuilder(
-      column: $table.overallScore, builder: (column) => column);
+  GeneratedColumn<String> get dietCharacter => $composableBuilder(
+      column: $table.dietCharacter, builder: (column) => column);
 
-  GeneratedColumn<String> get overallLevel => $composableBuilder(
-      column: $table.overallLevel, builder: (column) => column);
+  GeneratedColumn<String> get purchasePatterns => $composableBuilder(
+      column: $table.purchasePatterns, builder: (column) => column);
 
-  GeneratedColumn<String> get overallSummary => $composableBuilder(
-      column: $table.overallSummary, builder: (column) => column);
+  GeneratedColumn<String> get deficiencyWarnings => $composableBuilder(
+      column: $table.deficiencyWarnings, builder: (column) => column);
 
-  GeneratedColumn<String> get personalizedTips => $composableBuilder(
-      column: $table.personalizedTips, builder: (column) => column);
-
-  GeneratedColumn<String> get futurePredictions => $composableBuilder(
-      column: $table.futurePredictions, builder: (column) => column);
-
-  GeneratedColumn<String> get actionPlan => $composableBuilder(
-      column: $table.actionPlan, builder: (column) => column);
-
-  GeneratedColumn<String> get categoryAnalysis => $composableBuilder(
-      column: $table.categoryAnalysis, builder: (column) => column);
+  GeneratedColumn<String> get futureScenarios => $composableBuilder(
+      column: $table.futureScenarios, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3534,52 +3364,40 @@ class $$NutritionAnalysesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<int> userId = const Value.absent(),
             Value<DateTime> analysisDate = const Value.absent(),
-            Value<int> overallScore = const Value.absent(),
-            Value<String> overallLevel = const Value.absent(),
-            Value<String> overallSummary = const Value.absent(),
-            Value<String> personalizedTips = const Value.absent(),
-            Value<String> futurePredictions = const Value.absent(),
-            Value<String> actionPlan = const Value.absent(),
-            Value<String> categoryAnalysis = const Value.absent(),
+            Value<String> dietCharacter = const Value.absent(),
+            Value<String> purchasePatterns = const Value.absent(),
+            Value<String> deficiencyWarnings = const Value.absent(),
+            Value<String> futureScenarios = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               NutritionAnalysesCompanion(
             id: id,
             userId: userId,
             analysisDate: analysisDate,
-            overallScore: overallScore,
-            overallLevel: overallLevel,
-            overallSummary: overallSummary,
-            personalizedTips: personalizedTips,
-            futurePredictions: futurePredictions,
-            actionPlan: actionPlan,
-            categoryAnalysis: categoryAnalysis,
+            dietCharacter: dietCharacter,
+            purchasePatterns: purchasePatterns,
+            deficiencyWarnings: deficiencyWarnings,
+            futureScenarios: futureScenarios,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int userId,
             required DateTime analysisDate,
-            required int overallScore,
-            required String overallLevel,
-            required String overallSummary,
-            required String personalizedTips,
-            required String futurePredictions,
-            required String actionPlan,
-            required String categoryAnalysis,
+            required String dietCharacter,
+            required String purchasePatterns,
+            required String deficiencyWarnings,
+            required String futureScenarios,
             Value<DateTime> createdAt = const Value.absent(),
           }) =>
               NutritionAnalysesCompanion.insert(
             id: id,
             userId: userId,
             analysisDate: analysisDate,
-            overallScore: overallScore,
-            overallLevel: overallLevel,
-            overallSummary: overallSummary,
-            personalizedTips: personalizedTips,
-            futurePredictions: futurePredictions,
-            actionPlan: actionPlan,
-            categoryAnalysis: categoryAnalysis,
+            dietCharacter: dietCharacter,
+            purchasePatterns: purchasePatterns,
+            deficiencyWarnings: deficiencyWarnings,
+            futureScenarios: futureScenarios,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

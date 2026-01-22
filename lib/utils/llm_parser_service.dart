@@ -87,218 +87,173 @@ class LlmParserService {
   }
 }
 
-/// 영양 조언 결과
+/// 영양 조언 결과 (v2 - 창의적 분석)
 class NutritionAdviceResult {
-  final OverallAssessment overallAssessment;
-  final Map<String, CategoryAnalysis> categoryAnalysis;
-  final NutritionBalance nutritionBalance;
-  final List<String> personalizedTips;
-  final Map<String, FuturePrediction> futurePredictions;
-  final ActionPlan actionPlan;
+  final DietCharacter dietCharacter;
+  final List<PurchasePatternInsight> purchasePatterns;
+  final List<DeficiencyWarning> deficiencyWarnings;
+  final List<FutureHealthScenario> futureScenarios;
 
   NutritionAdviceResult({
-    required this.overallAssessment,
-    required this.categoryAnalysis,
-    required this.nutritionBalance,
-    required this.personalizedTips,
-    required this.futurePredictions,
-    required this.actionPlan,
+    required this.dietCharacter,
+    required this.purchasePatterns,
+    required this.deficiencyWarnings,
+    required this.futureScenarios,
   });
 
   factory NutritionAdviceResult.fromJson(Map<String, dynamic> json) {
-    // 카테고리 분석 파싱
-    final categoryMap = <String, CategoryAnalysis>{};
-    if (json['categoryAnalysis'] != null) {
-      (json['categoryAnalysis'] as Map<String, dynamic>).forEach((key, value) {
-        categoryMap[key] = CategoryAnalysis.fromJson(value);
-      });
-    }
-
-    // 미래 예측 파싱
-    final futureMap = <String, FuturePrediction>{};
-    if (json['futurePredictions'] != null) {
-      (json['futurePredictions'] as Map<String, dynamic>).forEach((key, value) {
-        futureMap[key] = FuturePrediction.fromJson(value);
-      });
-    }
-
     return NutritionAdviceResult(
-      overallAssessment: OverallAssessment.fromJson(json['overallAssessment'] ?? {}),
-      categoryAnalysis: categoryMap,
-      nutritionBalance: NutritionBalance.fromJson(json['nutritionBalance'] ?? {}),
-      personalizedTips: (json['personalizedTips'] as List?)?.cast<String>() ?? [],
-      futurePredictions: futureMap,
-      actionPlan: ActionPlan.fromJson(json['actionPlan'] ?? {}),
+      dietCharacter: DietCharacter.fromJson(json['dietCharacter'] ?? {}),
+      purchasePatterns: (json['purchasePatterns'] as List?)
+          ?.map((e) => PurchasePatternInsight.fromJson(e))
+          .toList() ?? [],
+      deficiencyWarnings: (json['deficiencyWarnings'] as List?)
+          ?.map((e) => DeficiencyWarning.fromJson(e))
+          .toList() ?? [],
+      futureScenarios: (json['futureScenarios'] as List?)
+          ?.map((e) => FutureHealthScenario.fromJson(e))
+          .toList() ?? [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'overallAssessment': overallAssessment.toJson(),
-      'categoryAnalysis': categoryAnalysis.map((k, v) => MapEntry(k, v.toJson())),
-      'nutritionBalance': nutritionBalance.toJson(),
-      'personalizedTips': personalizedTips,
-      'futurePredictions': futurePredictions.map((k, v) => MapEntry(k, v.toJson())),
-      'actionPlan': actionPlan.toJson(),
+      'dietCharacter': dietCharacter.toJson(),
+      'purchasePatterns': purchasePatterns.map((e) => e.toJson()).toList(),
+      'deficiencyWarnings': deficiencyWarnings.map((e) => e.toJson()).toList(),
+      'futureScenarios': futureScenarios.map((e) => e.toJson()).toList(),
     };
   }
 }
 
-class OverallAssessment {
-  final int score;
-  final String level;
-  final String summary;
+/// 식습관 캐릭터
+class DietCharacter {
+  final String typeName;
+  final String emoji;
+  final List<String> traits;
+  final String description;
+  final String riskSummary;
 
-  OverallAssessment({
-    required this.score,
-    required this.level,
-    required this.summary,
+  DietCharacter({
+    required this.typeName,
+    required this.emoji,
+    required this.traits,
+    required this.description,
+    required this.riskSummary,
   });
 
-  factory OverallAssessment.fromJson(Map<String, dynamic> json) {
-    return OverallAssessment(
-      score: (json['score'] as num?)?.toInt() ?? 0,
-      level: json['level'] as String? ?? '알 수 없음',
-      summary: json['summary'] as String? ?? '',
+  factory DietCharacter.fromJson(Map<String, dynamic> json) {
+    return DietCharacter(
+      typeName: json['typeName'] as String? ?? '분석 중',
+      emoji: json['emoji'] as String? ?? '🍽️',
+      traits: (json['traits'] as List?)?.cast<String>() ?? [],
+      description: json['description'] as String? ?? '',
+      riskSummary: json['riskSummary'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'score': score,
-    'level': level,
-    'summary': summary,
+    'typeName': typeName,
+    'emoji': emoji,
+    'traits': traits,
+    'description': description,
+    'riskSummary': riskSummary,
   };
 }
 
-class CategoryAnalysis {
-  final int percentage;
-  final String assessment;
-  final String advice;
+/// 구매 패턴 인사이트
+class PurchasePatternInsight {
+  final String pattern;
+  final String insight;
+  final String impact;
 
-  CategoryAnalysis({
-    required this.percentage,
-    required this.assessment,
-    required this.advice,
+  PurchasePatternInsight({
+    required this.pattern,
+    required this.insight,
+    required this.impact,
   });
 
-  factory CategoryAnalysis.fromJson(Map<String, dynamic> json) {
-    return CategoryAnalysis(
-      percentage: (json['percentage'] as num?)?.toInt() ?? 0,
-      assessment: json['assessment'] as String? ?? '',
-      advice: json['advice'] as String? ?? '',
+  factory PurchasePatternInsight.fromJson(Map<String, dynamic> json) {
+    return PurchasePatternInsight(
+      pattern: json['pattern'] as String? ?? '',
+      insight: json['insight'] as String? ?? '',
+      impact: json['impact'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'percentage': percentage,
-    'assessment': assessment,
-    'advice': advice,
+    'pattern': pattern,
+    'insight': insight,
+    'impact': impact,
   };
 }
 
-class NutritionBalance {
-  final NutritionStatus sodium;
-  final NutritionStatus sugar;
-  final NutritionStatus calories;
+/// 결핍 경고
+class DeficiencyWarning {
+  final String category;
+  final String nutrient;
+  final String warning;
+  final String recommendation;
 
-  NutritionBalance({
-    required this.sodium,
-    required this.sugar,
-    required this.calories,
+  DeficiencyWarning({
+    required this.category,
+    required this.nutrient,
+    required this.warning,
+    required this.recommendation,
   });
 
-  factory NutritionBalance.fromJson(Map<String, dynamic> json) {
-    return NutritionBalance(
-      sodium: NutritionStatus.fromJson(json['sodium'] ?? {}),
-      sugar: NutritionStatus.fromJson(json['sugar'] ?? {}),
-      calories: NutritionStatus.fromJson(json['calories'] ?? {}),
+  factory DeficiencyWarning.fromJson(Map<String, dynamic> json) {
+    return DeficiencyWarning(
+      category: json['category'] as String? ?? '',
+      nutrient: json['nutrient'] as String? ?? '',
+      warning: json['warning'] as String? ?? '',
+      recommendation: json['recommendation'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'sodium': sodium.toJson(),
-    'sugar': sugar.toJson(),
-    'calories': calories.toJson(),
+    'category': category,
+    'nutrient': nutrient,
+    'warning': warning,
+    'recommendation': recommendation,
   };
 }
 
-class NutritionStatus {
-  final String status;
-  final String advice;
-
-  NutritionStatus({
-    required this.status,
-    required this.advice,
-  });
-
-  factory NutritionStatus.fromJson(Map<String, dynamic> json) {
-    return NutritionStatus(
-      status: json['status'] as String? ?? '알 수 없음',
-      advice: json['advice'] as String? ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'status': status,
-    'advice': advice,
-  };
-}
-
-class FuturePrediction {
-  final String riskLevel;
-  final int metabolicScore;
-  final List<String> mainRisks;
+/// 미래 건강 시나리오
+class FutureHealthScenario {
+  final int targetAge;
+  final String condition;
+  final int probabilityPercent;
   final String explanation;
+  final String preventionTip;
 
-  FuturePrediction({
-    required this.riskLevel,
-    required this.metabolicScore,
-    required this.mainRisks,
+  FutureHealthScenario({
+    required this.targetAge,
+    required this.condition,
+    required this.probabilityPercent,
     required this.explanation,
+    required this.preventionTip,
   });
 
-  factory FuturePrediction.fromJson(Map<String, dynamic> json) {
-    return FuturePrediction(
-      riskLevel: json['riskLevel'] as String? ?? '알 수 없음',
-      metabolicScore: (json['metabolicScore'] as num?)?.toInt() ?? 0,
-      mainRisks: (json['mainRisks'] as List?)?.cast<String>() ?? [],
+  factory FutureHealthScenario.fromJson(Map<String, dynamic> json) {
+    return FutureHealthScenario(
+      targetAge: (json['targetAge'] as num?)?.toInt() ?? 0,
+      condition: json['condition'] as String? ?? '',
+      probabilityPercent: (json['probabilityPercent'] as num?)?.toInt() ?? 0,
       explanation: json['explanation'] as String? ?? '',
+      preventionTip: json['preventionTip'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'riskLevel': riskLevel,
-    'metabolicScore': metabolicScore,
-    'mainRisks': mainRisks,
+    'targetAge': targetAge,
+    'condition': condition,
+    'probabilityPercent': probabilityPercent,
     'explanation': explanation,
+    'preventionTip': preventionTip,
   };
 }
 
-class ActionPlan {
-  final List<String> immediate;
-  final List<String> shortTerm;
-  final List<String> longTerm;
-
-  ActionPlan({
-    required this.immediate,
-    required this.shortTerm,
-    required this.longTerm,
-  });
-
-  factory ActionPlan.fromJson(Map<String, dynamic> json) {
-    return ActionPlan(
-      immediate: (json['immediate'] as List?)?.cast<String>() ?? [],
-      shortTerm: (json['shortTerm'] as List?)?.cast<String>() ?? [],
-      longTerm: (json['longTerm'] as List?)?.cast<String>() ?? [],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'immediate': immediate,
-    'shortTerm': shortTerm,
-    'longTerm': longTerm,
-  };
-}
 
 /// LLM 파싱 결과
 class LlmParseResult {

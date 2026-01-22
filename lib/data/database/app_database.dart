@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -29,6 +29,12 @@ class AppDatabase extends _$AppDatabase {
       onUpgrade: (Migrator m, int from, int to) async {
         // 버전 2: NutritionAnalyses 테이블 추가
         if (from < 2) {
+          await m.createTable(nutritionAnalyses);
+        }
+        // 버전 3: NutritionAnalyses 테이블 스키마 변경 (v2 모델)
+        if (from < 3) {
+          // 기존 테이블 삭제 후 재생성 (데이터 손실, 새 분석으로 대체)
+          await m.deleteTable('nutrition_analyses');
           await m.createTable(nutritionAnalyses);
         }
       },

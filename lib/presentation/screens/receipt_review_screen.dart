@@ -200,14 +200,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
           purchaseHistory.add({
             'name': item.name,
             'category': item.category,
-            'price': item.price?.toInt() ?? 0,
-            'calories': item.calories,
-            'sodium': item.sodiumMg,
-            'sugar': item.sugarG,
-            'fat': item.fatG,
-            'protein': item.proteinG,
-            'carbs': item.carbsG,
-            'date': receipt.receiptDate.toIso8601String(),
+            'purchaseDate': receipt.receiptDate.toIso8601String().split('T')[0],
           });
         }
       }

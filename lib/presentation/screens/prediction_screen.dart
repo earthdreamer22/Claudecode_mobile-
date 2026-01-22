@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
 import '../../config/constants.dart';
-import '../../utils/prediction_engine.dart';
 import '../../utils/llm_parser_service.dart';
-import '../../data/models/prediction_result.dart';
-import '../../data/database/app_database.dart';
 import '../providers/database_provider.dart';
 import '../providers/user_provider.dart';
 
@@ -17,19 +13,18 @@ class PredictionScreen extends ConsumerStatefulWidget {
 }
 
 class _PredictionScreenState extends ConsumerState<PredictionScreen> {
-  bool _isLoading = false;
-  PredictionResult? _localResult;
-  NutritionAdviceResult? _llmAdvice;
+  bool _isLoading = true;
+  NutritionAdviceResult? _advice;
   String? _error;
-  List<FoodItemData> _allFoodItems = [];
+  int _totalFoodItems = 0;
 
   @override
   void initState() {
     super.initState();
-    _runPrediction();
+    _loadData();
   }
 
-  Future<void> _runPrediction() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _error = null;
@@ -44,44 +39,21 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
       }
 
       final receiptRepo = ref.read(receiptRepositoryProvider);
-      final receipts = await receiptRepo.getReceiptsByUser(user.id);
 
-      // 모든 영수증의 식료품 항목 가져오기 (누적)
-      _allFoodItems = [];
+      // 전체 품목 수 계산
+      final receipts = await receiptRepo.getReceiptsByUser(user.id);
+      int totalItems = 0;
       for (final receipt in receipts) {
         final items = await receiptRepo.getFoodItemsByReceipt(receipt.id);
-        _allFoodItems.addAll(items);
+        totalItems += items.length;
       }
 
-      // 1. 로컬 예측 엔진 실행 (기본 분석)
-      final engine = PredictionEngine();
-      final localResult = await engine.predictMetabolicRisk(
-        user: user,
-        recentFoodItems: _allFoodItems.cast(),
-        analyzeDays: 30,
-      );
+      // 캐시된 분석 결과 로드
+      final advice = await receiptRepo.getLatestNutritionAnalysis(user.id);
 
       setState(() {
-        _localResult = localResult;
-      });
-
-      // 2. DB에서 캐시된 LLM 영양 조언 확인 (API 호출 없음!)
-      if (_allFoodItems.isNotEmpty) {
-        final cachedAdvice = await receiptRepo.getLatestNutritionAnalysis(user.id);
-
-        if (cachedAdvice != null) {
-          // DB에 저장된 분석 결과 사용 (토큰 절약)
-          print('DB에서 캐시된 영양 분석 결과 로드');
-          setState(() {
-            _llmAdvice = cachedAdvice;
-          });
-        } else {
-          // 캐시 없음 - 신규 사용자 또는 데이터 없음
-          print('캐시된 분석 결과 없음 - 영수증 저장 시 분석됨');
-        }
-      }
-
-      setState(() {
+        _advice = advice;
+        _totalFoodItems = totalItems;
         _isLoading = false;
       });
     } catch (e) {
@@ -96,11 +68,11 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('대사증후군 위험도 분석'),
+        title: const Text('식습관 분석'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _runPrediction,
+            onPressed: _loadData,
           ),
         ],
       ),
@@ -111,30 +83,33 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('건강 데이터 불러오는 중...'),
+                  Text('분석 결과 불러오는 중...'),
                 ],
               ),
             )
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text('분석 실패: $_error'),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _runPrediction,
-                        child: const Text('다시 시도'),
-                      ),
-                    ],
-                  ),
-                )
-              : _localResult == null
+              ? _buildErrorView()
+              : _advice == null
                   ? _buildNoDataView()
                   : _buildResultView(),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text('오류: $_error'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadData,
+            child: const Text('다시 시도'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -146,12 +121,12 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
           Icon(Icons.receipt_long, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           const Text(
-            '분석할 데이터가 없습니다',
+            '분석 데이터가 없습니다',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            '영수증을 촬영하여 구매 이력을 추가하세요',
+            '영수증을 촬영하여 AI 분석을 받아보세요',
             style: TextStyle(color: Colors.grey[600]),
           ),
         ],
@@ -160,51 +135,57 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
   }
 
   Widget _buildResultView() {
-    final result = _localResult!;
+    final advice = _advice!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // AI 종합 평가 (LLM 결과)
-          if (_llmAdvice != null) _buildAiAssessmentCard(_llmAdvice!),
-          if (_llmAdvice != null) const SizedBox(height: 16),
-
-          // 위험도 카드
-          _buildRiskLevelCard(result),
+          // 분석 정보
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shopping_basket, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 8),
+                Text(
+                  '총 $_totalFoodItems개 품목 분석',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
 
-          // 대사 점수 차트
-          _buildMetabolicScoreChart(result),
+          // 1. 식습관 캐릭터
+          _buildCharacterCard(advice.dietCharacter),
           const SizedBox(height: 16),
 
-          // 세부 분석
-          _buildDetailedAnalysis(result),
-          const SizedBox(height: 16),
+          // 2. 구매 패턴 발견
+          if (advice.purchasePatterns.isNotEmpty)
+            _buildPatternsCard(advice.purchasePatterns),
+          if (advice.purchasePatterns.isNotEmpty) const SizedBox(height: 16),
 
-          // AI 맞춤 추천 (LLM 결과)
-          if (_llmAdvice != null) _buildAiRecommendations(_llmAdvice!),
-          if (_llmAdvice != null) const SizedBox(height: 16),
+          // 3. 결핍 경고
+          if (advice.deficiencyWarnings.isNotEmpty)
+            _buildDeficiencyCard(advice.deficiencyWarnings),
+          if (advice.deficiencyWarnings.isNotEmpty) const SizedBox(height: 16),
 
-          // 미래 예측 (LLM 결과 우선)
-          if (_llmAdvice != null)
-            _buildAiFuturePredictions(_llmAdvice!)
-          else
-            _buildFuturePredictions(result),
-          const SizedBox(height: 16),
-
-          // 실천 계획 (LLM 결과)
-          if (_llmAdvice != null) _buildActionPlan(_llmAdvice!),
+          // 4. 미래 시나리오
+          if (advice.futureScenarios.isNotEmpty)
+            _buildFutureCard(advice.futureScenarios),
         ],
       ),
     );
   }
 
-  Widget _buildAiAssessmentCard(NutritionAdviceResult advice) {
-    final assessment = advice.overallAssessment;
-    final levelColor = _getLevelColor(assessment.level);
-
+  Widget _buildCharacterCard(DietCharacter character) {
     return Card(
       elevation: 4,
       child: Container(
@@ -212,8 +193,8 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.blue.withOpacity(0.1),
-              Colors.purple.withOpacity(0.05),
+              Colors.purple.withOpacity(0.1),
+              Colors.blue.withOpacity(0.05),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -222,345 +203,313 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
         ),
         child: Column(
           children: [
+            // 캐릭터 아이콘 + 이름
+            Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.purple.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Text(
+                      character.emoji,
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '당신의 식습관 유형',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      Text(
+                        character.typeName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 특성 태그들
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: character.traits.map((trait) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  trait,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.purple[700],
+                  ),
+                ),
+              )).toList(),
+            ),
+            const SizedBox(height: 16),
+
+            // 설명
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                character.description,
+                style: const TextStyle(fontSize: 14, height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 리스크 요약
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      character.riskSummary,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.orange[900],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPatternsCard(List<PurchasePatternInsight> patterns) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.2),
+                    color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.psychology, color: Colors.blue, size: 28),
+                  child: const Icon(Icons.insights, color: Colors.blue, size: 20),
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'AI 종합 평가',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  '발견된 구매 패턴',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
+            ...patterns.asMap().entries.map((entry) {
+              final index = entry.key;
+              final pattern = entry.value;
+              return Container(
+                margin: EdgeInsets.only(bottom: index < patterns.length - 1 ? 12 : 0),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${assessment.score}',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: levelColor,
+                      pattern.pattern,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const Text('건강 점수', style: TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 8),
+                    Text(
+                      pattern.insight,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.trending_up, size: 14, color: Colors.red[400]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            pattern.impact,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.red[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: levelColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    assessment.level,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: levelColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                assessment.summary,
-                style: const TextStyle(fontSize: 14, height: 1.5),
-                textAlign: TextAlign.center,
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRiskLevelCard(PredictionResult result) {
-    final riskColor = _getRiskColor(result.riskLevel);
-    final riskIcon = _getRiskIcon(result.riskLevel);
-
+  Widget _buildDeficiencyCard(List<DeficiencyWarning> warnings) {
     return Card(
-      elevation: 4,
-      child: Container(
-        padding: const EdgeInsets.all(AppConstants.paddingLarge),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              riskColor.withOpacity(0.1),
-              riskColor.withOpacity(0.05),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(riskIcon, size: 64, color: riskColor),
-            const SizedBox(height: 16),
-            Text(
-              result.riskLevel,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: riskColor,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.remove_circle_outline, color: Colors.red, size: 20),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '결핍 경고',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
-              '대사 점수: ${result.metabolicScore.toStringAsFixed(1)}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '총 ${_allFoodItems.length}개 품목 분석',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMetabolicScoreChart(PredictionResult result) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '위험 요인 분석',
-              style: Theme.of(context).textTheme.titleLarge,
+              '구매 이력에서 발견되지 않은 필수 식품군',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: 100,
-                  barTouchData: BarTouchData(enabled: false),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final entries = result.riskFactors.entries.toList();
-                          if (value.toInt() < entries.length) {
-                            return Text(
-                              entries[value.toInt()].key,
-                              style: const TextStyle(fontSize: 12),
-                            );
-                          }
-                          return const Text('');
-                        },
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, meta) {
-                          return Text('${value.toInt()}',
-                              style: const TextStyle(fontSize: 10));
-                        },
-                      ),
-                    ),
-                    topTitles:
-                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles:
-                        const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: result.riskFactors.entries.toList().asMap().entries.map((entry) {
-                    return BarChartGroupData(
-                      x: entry.key,
-                      barRods: [
-                        BarChartRodData(
-                          toY: entry.value.value,
-                          color: _getBarColor(entry.key),
-                          width: 40,
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _getBarColor(int index) {
-    final colors = [Colors.blue, Colors.orange, Colors.purple, Colors.red];
-    return colors[index % colors.length];
-  }
-
-  Widget _buildDetailedAnalysis(PredictionResult result) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '세부 분석',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            _buildAnalysisRow(
-              'BMI',
-              result.bmi.toStringAsFixed(1),
-              _getBmiStatus(result.bmi),
-              _getBmiColor(result.bmi),
-            ),
-            const Divider(),
-            _buildAnalysisRow(
-              '평균 나트륨',
-              '${result.totalSodiumDailyMg}mg',
-              '${(result.totalSodiumDailyMg / AppConstants.dailySodiumLimitMg * 100).toStringAsFixed(0)}%',
-              _getPercentColor(result.totalSodiumDailyMg / AppConstants.dailySodiumLimitMg * 100),
-            ),
-            const Divider(),
-            _buildAnalysisRow(
-              '평균 칼로리',
-              '${result.totalCaloriesDaily}kcal',
-              '${(result.totalCaloriesDaily / AppConstants.dailyCaloriesLimitKcal * 100).toStringAsFixed(0)}%',
-              _getPercentColor(result.totalCaloriesDaily / AppConstants.dailyCaloriesLimitKcal * 100),
-            ),
-            const Divider(),
-            _buildAnalysisRow(
-              '평균 당류',
-              '${result.totalSugarDailyG.toStringAsFixed(1)}g',
-              '${(result.totalSugarDailyG / AppConstants.dailySugarLimitG * 100).toStringAsFixed(0)}%',
-              _getPercentColor(result.totalSugarDailyG / AppConstants.dailySugarLimitG * 100),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getBmiStatus(double bmi) {
-    if (bmi < AppConstants.bmiUnderweight) return '저체중';
-    if (bmi < AppConstants.bmiNormal) return '정상';
-    if (bmi < AppConstants.bmiOverweight) return '과체중';
-    return '비만';
-  }
-
-  Widget _buildAnalysisRow(
-      String label, String value, String status, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16)),
-          Row(
-            children: [
-              Text(
-                value,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ...warnings.asMap().entries.map((entry) {
+              final index = entry.key;
+              final warning = entry.value;
+              return Container(
+                margin: EdgeInsets.only(bottom: index < warnings.length - 1 ? 12 : 0),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.red.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.2)),
                 ),
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAiRecommendations(NutritionAdviceResult advice) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(Icons.lightbulb, color: Colors.amber, size: 20),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'AI 맞춤 추천',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...advice.personalizedTips.map(
-              (tip) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.check_circle,
-                        color: Colors.green, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        tip,
-                        style: const TextStyle(fontSize: 14, height: 1.5),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            warning.category,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red[700],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.arrow_forward, size: 14, color: Colors.grey[400]),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${warning.nutrient} 부족',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      warning.warning,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.lightbulb_outline, size: 16, color: Colors.green[600]),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            warning.recommendation,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAiFuturePredictions(NutritionAdviceResult advice) {
+  Widget _buildFutureCard(List<FutureHealthScenario> scenarios) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.paddingMedium),
@@ -570,17 +519,17 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.indigo.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.timeline, color: Colors.blue, size: 20),
+                  child: const Icon(Icons.auto_graph, color: Colors.indigo, size: 20),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'AI 미래 예측',
-                  style: Theme.of(context).textTheme.titleLarge,
+                const SizedBox(width: 12),
+                const Text(
+                  '미래 건강 시나리오',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -590,302 +539,117 @@ class _PredictionScreenState extends ConsumerState<PredictionScreen> {
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
-            ...advice.futurePredictions.entries.map(
-              (entry) {
-                final prediction = entry.value;
-                final riskColor = _getRiskColor(prediction.riskLevel);
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: riskColor.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: riskColor.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            entry.key,
-                            style: const TextStyle(
+            ...scenarios.asMap().entries.map((entry) {
+              final index = entry.key;
+              final scenario = entry.value;
+              final riskColor = _getRiskColor(scenario.probabilityPercent);
+
+              return Container(
+                margin: EdgeInsets.only(bottom: index < scenarios.length - 1 ? 12 : 0),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: riskColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: riskColor.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.indigo.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${scenario.targetAge}세',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              scenario.condition,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: riskColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${scenario.probabilityPercent}%',
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: riskColor,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: riskColor.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      scenario.explanation,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.tips_and_updates, size: 16, color: Colors.green[700]),
+                          const SizedBox(width: 8),
+                          Expanded(
                             child: Text(
-                              prediction.riskLevel,
+                              scenario.preventionTip,
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: riskColor,
+                                fontSize: 12,
+                                color: Colors.green[800],
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        prediction.explanation,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                          height: 1.4,
-                        ),
-                      ),
-                      if (prediction.mainRisks.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          children: prediction.mainRisks.map((risk) => Chip(
-                            label: Text(risk, style: const TextStyle(fontSize: 11)),
-                            backgroundColor: riskColor.withOpacity(0.1),
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          )).toList(),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFuturePredictions(PredictionResult result) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.trending_up, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  '미래 예측',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '현재 식습관 유지 시 예상 위험도',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 16),
-            ...result.futurePredictions.entries.map(
-              (entry) {
-                final riskLevel = _scoreToRiskLevel(entry.value);
-                final riskColor = _getRiskColor(riskLevel);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${entry.key} 후',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: riskColor.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          riskLevel,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: riskColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionPlan(NutritionAdviceResult advice) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Icon(Icons.checklist, color: Colors.green, size: 20),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '실천 계획',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 즉시 실천
-            if (advice.actionPlan.immediate.isNotEmpty) ...[
-              _buildActionSection('즉시 실천', advice.actionPlan.immediate, Colors.red),
-              const SizedBox(height: 12),
-            ],
-
-            // 단기 계획 (1-3개월)
-            if (advice.actionPlan.shortTerm.isNotEmpty) ...[
-              _buildActionSection('1-3개월 내', advice.actionPlan.shortTerm, Colors.orange),
-              const SizedBox(height: 12),
-            ],
-
-            // 장기 계획
-            if (advice.actionPlan.longTerm.isNotEmpty) ...[
-              _buildActionSection('장기 목표', advice.actionPlan.longTerm, Colors.blue),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionSection(String title, List<String> items, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 6),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.arrow_right, color: color, size: 20),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(item, style: const TextStyle(fontSize: 13, height: 1.4)),
-              ),
-            ],
-          ),
-        )),
-      ],
-    );
-  }
-
-  String _scoreToRiskLevel(double score) {
-    if (score < 25) return '정상';
-    if (score < 50) return '주의';
-    if (score < 75) return '위험';
-    return '고위험';
-  }
-
-  Color _getRiskColor(String riskLevel) {
-    switch (riskLevel) {
-      case '정상':
-      case '양호':
-        return Colors.green;
-      case '주의':
-        return Colors.orange;
-      case '위험':
-      case '경고':
-        return Colors.deepOrange;
-      case '고위험':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getLevelColor(String level) {
-    switch (level) {
-      case '양호':
-        return Colors.green;
-      case '주의':
-        return Colors.orange;
-      case '경고':
-        return Colors.deepOrange;
-      case '위험':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getRiskIcon(String riskLevel) {
-    switch (riskLevel) {
-      case '정상':
-        return Icons.check_circle;
-      case '주의':
-        return Icons.warning;
-      case '위험':
-        return Icons.error;
-      case '고위험':
-        return Icons.dangerous;
-      default:
-        return Icons.help;
-    }
-  }
-
-  Color _getBmiColor(double bmi) {
-    if (bmi < AppConstants.bmiUnderweight) {
-      return Colors.blue;
-    } else if (bmi < AppConstants.bmiNormal) {
-      return Colors.green;
-    } else if (bmi < AppConstants.bmiOverweight) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
-  }
-
-  Color _getPercentColor(double percent) {
-    if (percent < 50) {
-      return Colors.green;
-    } else if (percent < 80) {
-      return Colors.orange;
-    } else {
-      return Colors.red;
-    }
+  Color _getRiskColor(int probabilityPercent) {
+    if (probabilityPercent < 30) return Colors.green;
+    if (probabilityPercent < 50) return Colors.orange;
+    if (probabilityPercent < 70) return Colors.deepOrange;
+    return Colors.red;
   }
 }

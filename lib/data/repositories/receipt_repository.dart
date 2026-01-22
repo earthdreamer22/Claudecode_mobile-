@@ -121,7 +121,7 @@ class ReceiptRepository {
     return result > 0;
   }
 
-  // ========== NutritionAnalysis CRUD ==========
+  // ========== NutritionAnalysis CRUD (v2) ==========
 
   /// 영양 분석 결과 저장
   Future<int> saveNutritionAnalysis({
@@ -132,16 +132,15 @@ class ReceiptRepository {
       NutritionAnalysesCompanion.insert(
         userId: userId,
         analysisDate: DateTime.now(),
-        overallScore: advice.overallAssessment.score,
-        overallLevel: advice.overallAssessment.level,
-        overallSummary: advice.overallAssessment.summary,
-        personalizedTips: jsonEncode(advice.personalizedTips),
-        futurePredictions: jsonEncode(
-          advice.futurePredictions.map((k, v) => MapEntry(k, v.toJson())),
+        dietCharacter: jsonEncode(advice.dietCharacter.toJson()),
+        purchasePatterns: jsonEncode(
+          advice.purchasePatterns.map((e) => e.toJson()).toList(),
         ),
-        actionPlan: jsonEncode(advice.actionPlan.toJson()),
-        categoryAnalysis: jsonEncode(
-          advice.categoryAnalysis.map((k, v) => MapEntry(k, v.toJson())),
+        deficiencyWarnings: jsonEncode(
+          advice.deficiencyWarnings.map((e) => e.toJson()).toList(),
+        ),
+        futureScenarios: jsonEncode(
+          advice.futureScenarios.map((e) => e.toJson()).toList(),
         ),
       ),
     );
@@ -157,42 +156,33 @@ class ReceiptRepository {
 
   /// DB 데이터를 NutritionAdviceResult로 변환
   NutritionAdviceResult _convertToNutritionAdvice(NutritionAnalysisData data) {
-    // personalizedTips 파싱
-    final tips = (jsonDecode(data.personalizedTips) as List).cast<String>();
+    // dietCharacter 파싱
+    final characterJson = jsonDecode(data.dietCharacter) as Map<String, dynamic>;
+    final dietCharacter = DietCharacter.fromJson(characterJson);
 
-    // futurePredictions 파싱
-    final futureMap = <String, FuturePrediction>{};
-    final futureJson = jsonDecode(data.futurePredictions) as Map<String, dynamic>;
-    futureJson.forEach((key, value) {
-      futureMap[key] = FuturePrediction.fromJson(value);
-    });
+    // purchasePatterns 파싱
+    final patternsJson = jsonDecode(data.purchasePatterns) as List;
+    final purchasePatterns = patternsJson
+        .map((e) => PurchasePatternInsight.fromJson(e))
+        .toList();
 
-    // actionPlan 파싱
-    final actionJson = jsonDecode(data.actionPlan) as Map<String, dynamic>;
-    final actionPlan = ActionPlan.fromJson(actionJson);
+    // deficiencyWarnings 파싱
+    final warningsJson = jsonDecode(data.deficiencyWarnings) as List;
+    final deficiencyWarnings = warningsJson
+        .map((e) => DeficiencyWarning.fromJson(e))
+        .toList();
 
-    // categoryAnalysis 파싱
-    final categoryMap = <String, CategoryAnalysis>{};
-    final categoryJson = jsonDecode(data.categoryAnalysis) as Map<String, dynamic>;
-    categoryJson.forEach((key, value) {
-      categoryMap[key] = CategoryAnalysis.fromJson(value);
-    });
+    // futureScenarios 파싱
+    final scenariosJson = jsonDecode(data.futureScenarios) as List;
+    final futureScenarios = scenariosJson
+        .map((e) => FutureHealthScenario.fromJson(e))
+        .toList();
 
     return NutritionAdviceResult(
-      overallAssessment: OverallAssessment(
-        score: data.overallScore,
-        level: data.overallLevel,
-        summary: data.overallSummary,
-      ),
-      categoryAnalysis: categoryMap,
-      nutritionBalance: NutritionBalance(
-        sodium: NutritionStatus(status: '알 수 없음', advice: ''),
-        sugar: NutritionStatus(status: '알 수 없음', advice: ''),
-        calories: NutritionStatus(status: '알 수 없음', advice: ''),
-      ),
-      personalizedTips: tips,
-      futurePredictions: futureMap,
-      actionPlan: actionPlan,
+      dietCharacter: dietCharacter,
+      purchasePatterns: purchasePatterns,
+      deficiencyWarnings: deficiencyWarnings,
+      futureScenarios: futureScenarios,
     );
   }
 
