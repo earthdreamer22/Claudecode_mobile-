@@ -32,7 +32,15 @@ export default async function handler(req, res) {
 ## 분석 관점
 
 ### 1. 식습관 캐릭터 (dietCharacter)
-- 구매 패턴에서 캐릭터 유형 도출
+- **MBTI가 있으면**: MBTI 성격 유형과 구매 패턴을 결합하여 스토리텔링 기반 캐릭터 생성
+  - 캐릭터명 형식: "[MBTI]형 [식습관 특성]" (예: "ENFP형 충동 미식가", "ISTJ형 철저한 영양관리러")
+  - MBTI 성격 특성이 어떻게 식습관에 영향을 미치는지 스토리로 설명
+  - 예시:
+    - "ENFP형 충동 미식가": 새로운 음식에 대한 호기심으로 다양하게 구매하지만 계획성 부족
+    - "ISTJ형 철저한 영양관리러": 규칙적이고 계획적인 장보기, 같은 건강식품 반복 구매
+    - "INFP형 감성 야식러": 감정에 따라 위로 음식 선택, 혼자만의 야식 시간
+    - "ENTJ형 효율적 단백질러": 목표 지향적으로 고단백 식품 중심 구매
+- **MBTI가 없으면**: 구매 패턴만으로 캐릭터 유형 도출
 - 예시 유형들 (부정):
   - "야행성 가공러": 저녁 늦은 시간 편의점 구매 빈번
   - "주말 보상형": 평일 절제, 주말 폭발
@@ -134,7 +142,8 @@ export default async function handler(req, res) {
 ${userProfile ? `- 나이: ${userProfile.age || '미입력'}세
 - 성별: ${userProfile.gender || '미입력'}
 - 키: ${userProfile.height || '미입력'}cm
-- 체중: ${userProfile.weight || '미입력'}kg` : '프로필 정보 없음'}
+- 체중: ${userProfile.weight || '미입력'}kg
+- MBTI: ${userProfile.mbti || '미입력'}` : '프로필 정보 없음'}
 
 ## 현재 영수증 항목 (이번에 구매한 것, dietCharacter/purchasePatterns 분석 기준)
 ${currentItemsText}

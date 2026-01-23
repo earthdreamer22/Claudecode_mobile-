@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -40,6 +40,10 @@ class AppDatabase extends _$AppDatabase {
         // 버전 4: trendComparison 컬럼 추가
         if (from < 4) {
           await m.addColumn(nutritionAnalyses, nutritionAnalyses.trendComparison);
+        }
+        // 버전 5: UserProfile에 mbti 컬럼 추가
+        if (from < 5) {
+          await m.addColumn(userProfile, userProfile.mbti);
         }
       },
     );

@@ -34,6 +34,7 @@ class UserNotifier extends StateNotifier<AsyncValue<UserProfileData?>> {
     required double weight,
     Map<String, bool>? familyHistory,
     Map<String, bool>? existingConditions,
+    String? mbti,
   }) async {
     try {
       final userId = await _userRepository.createProfile(
@@ -43,6 +44,7 @@ class UserNotifier extends StateNotifier<AsyncValue<UserProfileData?>> {
         weight: weight,
         familyHistory: familyHistory,
         existingConditions: existingConditions,
+        mbti: mbti,
       );
 
       // SharedPreferences에 userId 저장
@@ -66,6 +68,7 @@ class UserNotifier extends StateNotifier<AsyncValue<UserProfileData?>> {
     double? weight,
     Map<String, bool>? familyHistory,
     Map<String, bool>? existingConditions,
+    String? mbti,
   }) async {
     try {
       final success = await _userRepository.updateProfile(
@@ -76,6 +79,7 @@ class UserNotifier extends StateNotifier<AsyncValue<UserProfileData?>> {
         weight: weight,
         familyHistory: familyHistory,
         existingConditions: existingConditions,
+        mbti: mbti,
       );
 
       if (success) {

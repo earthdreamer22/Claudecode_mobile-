@@ -9,6 +9,9 @@ class UserProfile extends Table {
   RealColumn get height => real()(); // cm
   RealColumn get weight => real()(); // kg
 
+  // MBTI 유형 (예: 'ENFP', 'ISTJ' 등, nullable)
+  TextColumn get mbti => text().nullable()();
+
   // JSON 형태로 저장: {"diabetes": false, "hypertension": true, ...}
   TextColumn get familyHistory => text().withDefault(const Constant('{}'))();
 

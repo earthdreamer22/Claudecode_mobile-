@@ -20,6 +20,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _weightController = TextEditingController();
 
   String _selectedGender = 'M';
+  String? _selectedMbti;
+
+  // MBTI 유형 목록
+  static const List<String> _mbtiTypes = [
+    'INTJ', 'INTP', 'ENTJ', 'ENTP',
+    'INFJ', 'INFP', 'ENFJ', 'ENFP',
+    'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+    'ISTP', 'ISFP', 'ESTP', 'ESFP',
+  ];
+
   final Map<String, bool> _familyHistory = {
     '당뇨병': false,
     '고혈압': false,
@@ -53,6 +63,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           weight: double.parse(_weightController.text),
           familyHistory: _familyHistory,
           existingConditions: {'has_conditions': _hasExistingConditions},
+          mbti: _selectedMbti,
         );
 
     setState(() {
@@ -146,6 +157,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onChanged: (value) {
                   setState(() {
                     _selectedGender = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // MBTI (선택사항)
+              DropdownButtonFormField<String>(
+                value: _selectedMbti,
+                decoration: const InputDecoration(
+                  labelText: 'MBTI (선택사항)',
+                  hintText: '모르면 선택 안해도 됩니다',
+                  prefixIcon: Icon(Icons.psychology),
+                ),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('선택 안함'),
+                  ),
+                  ..._mbtiTypes.map((type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(type),
+                      )),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMbti = value;
                   });
                 },
               ),

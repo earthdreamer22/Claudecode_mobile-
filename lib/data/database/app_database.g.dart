@@ -38,6 +38,11 @@ class $UserProfileTable extends UserProfile
   late final GeneratedColumn<double> weight = GeneratedColumn<double>(
       'weight', aliasedName, false,
       type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _mbtiMeta = const VerificationMeta('mbti');
+  @override
+  late final GeneratedColumn<String> mbti = GeneratedColumn<String>(
+      'mbti', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _familyHistoryMeta =
       const VerificationMeta('familyHistory');
   @override
@@ -77,6 +82,7 @@ class $UserProfileTable extends UserProfile
         gender,
         height,
         weight,
+        mbti,
         familyHistory,
         existingConditions,
         createdAt,
@@ -119,6 +125,10 @@ class $UserProfileTable extends UserProfile
     } else if (isInserting) {
       context.missing(_weightMeta);
     }
+    if (data.containsKey('mbti')) {
+      context.handle(
+          _mbtiMeta, mbti.isAcceptableOrUnknown(data['mbti']!, _mbtiMeta));
+    }
     if (data.containsKey('family_history')) {
       context.handle(
           _familyHistoryMeta,
@@ -158,6 +168,8 @@ class $UserProfileTable extends UserProfile
           .read(DriftSqlType.double, data['${effectivePrefix}height'])!,
       weight: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}weight'])!,
+      mbti: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}mbti']),
       familyHistory: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}family_history'])!,
       existingConditions: attachedDatabase.typeMapping.read(
@@ -181,6 +193,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
   final String gender;
   final double height;
   final double weight;
+  final String? mbti;
   final String familyHistory;
   final String existingConditions;
   final DateTime createdAt;
@@ -191,6 +204,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
       required this.gender,
       required this.height,
       required this.weight,
+      this.mbti,
       required this.familyHistory,
       required this.existingConditions,
       required this.createdAt,
@@ -203,6 +217,9 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
     map['gender'] = Variable<String>(gender);
     map['height'] = Variable<double>(height);
     map['weight'] = Variable<double>(weight);
+    if (!nullToAbsent || mbti != null) {
+      map['mbti'] = Variable<String>(mbti);
+    }
     map['family_history'] = Variable<String>(familyHistory);
     map['existing_conditions'] = Variable<String>(existingConditions);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -217,6 +234,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
       gender: Value(gender),
       height: Value(height),
       weight: Value(weight),
+      mbti: mbti == null && nullToAbsent ? const Value.absent() : Value(mbti),
       familyHistory: Value(familyHistory),
       existingConditions: Value(existingConditions),
       createdAt: Value(createdAt),
@@ -233,6 +251,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
       gender: serializer.fromJson<String>(json['gender']),
       height: serializer.fromJson<double>(json['height']),
       weight: serializer.fromJson<double>(json['weight']),
+      mbti: serializer.fromJson<String?>(json['mbti']),
       familyHistory: serializer.fromJson<String>(json['familyHistory']),
       existingConditions:
           serializer.fromJson<String>(json['existingConditions']),
@@ -249,6 +268,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
       'gender': serializer.toJson<String>(gender),
       'height': serializer.toJson<double>(height),
       'weight': serializer.toJson<double>(weight),
+      'mbti': serializer.toJson<String?>(mbti),
       'familyHistory': serializer.toJson<String>(familyHistory),
       'existingConditions': serializer.toJson<String>(existingConditions),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -262,6 +282,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
           String? gender,
           double? height,
           double? weight,
+          Value<String?> mbti = const Value.absent(),
           String? familyHistory,
           String? existingConditions,
           DateTime? createdAt,
@@ -272,6 +293,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
         gender: gender ?? this.gender,
         height: height ?? this.height,
         weight: weight ?? this.weight,
+        mbti: mbti.present ? mbti.value : this.mbti,
         familyHistory: familyHistory ?? this.familyHistory,
         existingConditions: existingConditions ?? this.existingConditions,
         createdAt: createdAt ?? this.createdAt,
@@ -284,6 +306,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
       gender: data.gender.present ? data.gender.value : this.gender,
       height: data.height.present ? data.height.value : this.height,
       weight: data.weight.present ? data.weight.value : this.weight,
+      mbti: data.mbti.present ? data.mbti.value : this.mbti,
       familyHistory: data.familyHistory.present
           ? data.familyHistory.value
           : this.familyHistory,
@@ -303,6 +326,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
           ..write('gender: $gender, ')
           ..write('height: $height, ')
           ..write('weight: $weight, ')
+          ..write('mbti: $mbti, ')
           ..write('familyHistory: $familyHistory, ')
           ..write('existingConditions: $existingConditions, ')
           ..write('createdAt: $createdAt, ')
@@ -312,7 +336,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, age, gender, height, weight,
+  int get hashCode => Object.hash(id, age, gender, height, weight, mbti,
       familyHistory, existingConditions, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
@@ -323,6 +347,7 @@ class UserProfileData extends DataClass implements Insertable<UserProfileData> {
           other.gender == this.gender &&
           other.height == this.height &&
           other.weight == this.weight &&
+          other.mbti == this.mbti &&
           other.familyHistory == this.familyHistory &&
           other.existingConditions == this.existingConditions &&
           other.createdAt == this.createdAt &&
@@ -335,6 +360,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
   final Value<String> gender;
   final Value<double> height;
   final Value<double> weight;
+  final Value<String?> mbti;
   final Value<String> familyHistory;
   final Value<String> existingConditions;
   final Value<DateTime> createdAt;
@@ -345,6 +371,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
     this.gender = const Value.absent(),
     this.height = const Value.absent(),
     this.weight = const Value.absent(),
+    this.mbti = const Value.absent(),
     this.familyHistory = const Value.absent(),
     this.existingConditions = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -356,6 +383,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
     required String gender,
     required double height,
     required double weight,
+    this.mbti = const Value.absent(),
     this.familyHistory = const Value.absent(),
     this.existingConditions = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -370,6 +398,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
     Expression<String>? gender,
     Expression<double>? height,
     Expression<double>? weight,
+    Expression<String>? mbti,
     Expression<String>? familyHistory,
     Expression<String>? existingConditions,
     Expression<DateTime>? createdAt,
@@ -381,6 +410,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
       if (gender != null) 'gender': gender,
       if (height != null) 'height': height,
       if (weight != null) 'weight': weight,
+      if (mbti != null) 'mbti': mbti,
       if (familyHistory != null) 'family_history': familyHistory,
       if (existingConditions != null) 'existing_conditions': existingConditions,
       if (createdAt != null) 'created_at': createdAt,
@@ -394,6 +424,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
       Value<String>? gender,
       Value<double>? height,
       Value<double>? weight,
+      Value<String?>? mbti,
       Value<String>? familyHistory,
       Value<String>? existingConditions,
       Value<DateTime>? createdAt,
@@ -404,6 +435,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
       gender: gender ?? this.gender,
       height: height ?? this.height,
       weight: weight ?? this.weight,
+      mbti: mbti ?? this.mbti,
       familyHistory: familyHistory ?? this.familyHistory,
       existingConditions: existingConditions ?? this.existingConditions,
       createdAt: createdAt ?? this.createdAt,
@@ -429,6 +461,9 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
     if (weight.present) {
       map['weight'] = Variable<double>(weight.value);
     }
+    if (mbti.present) {
+      map['mbti'] = Variable<String>(mbti.value);
+    }
     if (familyHistory.present) {
       map['family_history'] = Variable<String>(familyHistory.value);
     }
@@ -452,6 +487,7 @@ class UserProfileCompanion extends UpdateCompanion<UserProfileData> {
           ..write('gender: $gender, ')
           ..write('height: $height, ')
           ..write('weight: $weight, ')
+          ..write('mbti: $mbti, ')
           ..write('familyHistory: $familyHistory, ')
           ..write('existingConditions: $existingConditions, ')
           ..write('createdAt: $createdAt, ')
@@ -2033,6 +2069,7 @@ typedef $$UserProfileTableCreateCompanionBuilder = UserProfileCompanion
   required String gender,
   required double height,
   required double weight,
+  Value<String?> mbti,
   Value<String> familyHistory,
   Value<String> existingConditions,
   Value<DateTime> createdAt,
@@ -2045,6 +2082,7 @@ typedef $$UserProfileTableUpdateCompanionBuilder = UserProfileCompanion
   Value<String> gender,
   Value<double> height,
   Value<double> weight,
+  Value<String?> mbti,
   Value<String> familyHistory,
   Value<String> existingConditions,
   Value<DateTime> createdAt,
@@ -2112,6 +2150,9 @@ class $$UserProfileTableFilterComposer
 
   ColumnFilters<double> get weight => $composableBuilder(
       column: $table.weight, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mbti => $composableBuilder(
+      column: $table.mbti, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get familyHistory => $composableBuilder(
       column: $table.familyHistory, builder: (column) => ColumnFilters(column));
@@ -2193,6 +2234,9 @@ class $$UserProfileTableOrderingComposer
   ColumnOrderings<double> get weight => $composableBuilder(
       column: $table.weight, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get mbti => $composableBuilder(
+      column: $table.mbti, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get familyHistory => $composableBuilder(
       column: $table.familyHistory,
       builder: (column) => ColumnOrderings(column));
@@ -2231,6 +2275,9 @@ class $$UserProfileTableAnnotationComposer
 
   GeneratedColumn<double> get weight =>
       $composableBuilder(column: $table.weight, builder: (column) => column);
+
+  GeneratedColumn<String> get mbti =>
+      $composableBuilder(column: $table.mbti, builder: (column) => column);
 
   GeneratedColumn<String> get familyHistory => $composableBuilder(
       column: $table.familyHistory, builder: (column) => column);
@@ -2316,6 +2363,7 @@ class $$UserProfileTableTableManager extends RootTableManager<
             Value<String> gender = const Value.absent(),
             Value<double> height = const Value.absent(),
             Value<double> weight = const Value.absent(),
+            Value<String?> mbti = const Value.absent(),
             Value<String> familyHistory = const Value.absent(),
             Value<String> existingConditions = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -2327,6 +2375,7 @@ class $$UserProfileTableTableManager extends RootTableManager<
             gender: gender,
             height: height,
             weight: weight,
+            mbti: mbti,
             familyHistory: familyHistory,
             existingConditions: existingConditions,
             createdAt: createdAt,
@@ -2338,6 +2387,7 @@ class $$UserProfileTableTableManager extends RootTableManager<
             required String gender,
             required double height,
             required double weight,
+            Value<String?> mbti = const Value.absent(),
             Value<String> familyHistory = const Value.absent(),
             Value<String> existingConditions = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -2349,6 +2399,7 @@ class $$UserProfileTableTableManager extends RootTableManager<
             gender: gender,
             height: height,
             weight: weight,
+            mbti: mbti,
             familyHistory: familyHistory,
             existingConditions: existingConditions,
             createdAt: createdAt,

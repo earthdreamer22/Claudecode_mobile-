@@ -225,6 +225,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
           'gender': user.gender,
           'height': user.height,
           'weight': user.weight,
+          'mbti': user.mbti,
         };
 
         // LLM 영양 조언 호출 (현재 영수증 + 이전 캐릭터 포함)

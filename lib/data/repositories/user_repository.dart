@@ -16,6 +16,7 @@ class UserRepository {
     required double weight,
     Map<String, bool>? familyHistory,
     Map<String, bool>? existingConditions,
+    String? mbti,
   }) async {
     return await _db.createUserProfile(
       UserProfileCompanion.insert(
@@ -25,6 +26,7 @@ class UserRepository {
         weight: weight,
         familyHistory: Value(json.encode(familyHistory ?? {})),
         existingConditions: Value(json.encode(existingConditions ?? {})),
+        mbti: Value(mbti),
       ),
     );
   }
@@ -48,6 +50,7 @@ class UserRepository {
     double? weight,
     Map<String, bool>? familyHistory,
     Map<String, bool>? existingConditions,
+    String? mbti,
   }) async {
     final existing = await getProfile(userId);
     if (existing == null) return false;
@@ -62,6 +65,7 @@ class UserRepository {
       existingConditions: existingConditions != null
           ? json.encode(existingConditions)
           : existing.existingConditions,
+      mbti: Value(mbti ?? existing.mbti),
       updatedAt: DateTime.now(),
     );
 
